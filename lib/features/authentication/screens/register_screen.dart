@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -114,6 +115,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return "Please enter your email";
                   }
 
+                  final email = value.trim();
+
+                  if (!RegExp(
+                    r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+                  ).hasMatch(email)) {
+                    return "Please enter a valid email address";
+                  }
+
                   return null;
                 },
               ),
@@ -148,8 +157,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
 
                 validator: (value) {
-                  if (value == null || value.length < 8) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter a password";
+                  }
+
+                  if (value.length < 8) {
                     return "Password must be at least 8 characters";
+                  }
+
+                  if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                    return "Password must contain an uppercase letter";
+                  }
+
+                  if (!RegExp(r'[a-z]').hasMatch(value)) {
+                    return "Password must contain a lowercase letter";
+                  }
+
+                  if (!RegExp(r'\d').hasMatch(value)) {
+                    return "Password must contain a number";
                   }
 
                   return null;
@@ -214,36 +239,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   Expanded(
                     child: RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
+                      text: TextSpan(
+                        style: const TextStyle(
                           color: Colors.black87,
                           fontSize: 13,
                         ),
                         children: [
 
-                          TextSpan(
+                          const TextSpan(
                             text: "I agree to the ",
                           ),
 
                           TextSpan(
                             text: "Terms of Service",
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
                             ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                context.push("/terms");
+                              },
                           ),
 
-                          TextSpan(
+                          const TextSpan(
                             text: " and ",
                           ),
 
                           TextSpan(
                             text: "Privacy Policy",
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
                             ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                context.push("/privacy");
+                              },
                           ),
+
                         ],
                       ),
                     ),
@@ -284,10 +320,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     try {
                       await _repository.register(
-                        fullName: fullNameController.text,
-                        email: emailController.text,
+                        fullName: fullNameController.text.trim(),
+                        email: emailController.text.trim(),
                         password: passwordController.text,
                       );
+
+                      if (!mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Account created! Please verify your email.",
+                          ),
+                        ),
+                      );
+
+                      context.go("/verify-email");
                     } on FirebaseAuthException catch (e) {
                       if (!mounted) return;
 
@@ -343,9 +391,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 54,
 
                 child: OutlinedButton.icon(
-                  onPressed: () => context.go("/dashboard"),
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    try {
+                      await _repository.googleLogin();
+                    } on FirebaseAuthException catch (e) {
+                      if (!mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            e.message ?? "Google sign in failed.",
+                          ),
+                        ),
+                      );
+                    } finally {
+                      if (mounted) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+                    }
+                  },
 
                   icon: const Icon(Icons.g_mobiledata),
+
                   label: const Text(
                     "Sign up with Google",
                     style: TextStyle(

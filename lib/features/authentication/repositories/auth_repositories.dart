@@ -42,4 +42,17 @@ class AuthRepository {
   Future<UserCredential> signInAnonymously() {
     return AuthService.signInAnonymously();
   }
+
+  Future<void> resendVerificationEmail() {
+    return AuthService.resendVerificationEmail();
+  }
+
+  Future<bool> isEmailVerified() {
+    return AuthService.isEmailVerified();
+  }
+
+  bool get requiresEmailVerification =>
+      AuthService.requiresEmailVerification;
+
+
 }

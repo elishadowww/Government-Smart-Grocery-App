@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/authentication/repositories/auth_repositories.dart';
 import '../../features/authentication/screens/forgot_password_screen.dart';
 import '../../features/authentication/screens/intro_screen.dart';
 import '../../features/authentication/screens/login_screen.dart';
+import '../../features/authentication/screens/privacy_policy_screen.dart';
 import '../../features/authentication/screens/register_screen.dart';
 import '../../features/authentication/screens/splash_screen.dart';
+import '../../features/authentication/screens/terms_of_service_screen.dart';
+import '../../features/authentication/screens/verify_email_screen.dart';
 import '../../features/authentication/services/auth_state_notifier.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/nearby_supermarket/screens/map_screen.dart';
@@ -18,24 +22,34 @@ final appRouter = GoRouter(
   refreshListenable: _authNotifier,
 
   redirect: (context, state) {
-    final loggedIn = FirebaseAuth.instance.currentUser != null;
+    final user = FirebaseAuth.instance.currentUser;
 
     final location = state.uri.path;
 
-    const authRoutes = {
-      "/",
-      "/intro",
-      "/login",
-      "/register",
-      "/forgot",
-    };
+    if (user == null) {
+      if (location == "/dashboard" ||
+          location == "/verify-email") {
+        return "/intro";
+      }
 
-    if (loggedIn && authRoutes.contains(location)) {
-      return "/dashboard";
+      return null;
     }
 
-    if (!loggedIn && location == "/dashboard") {
-      return "/intro";
+    if (AuthRepository().requiresEmailVerification) {
+      if (location != "/verify-email") {
+        return "/verify-email";
+      }
+
+      return null;
+    }
+
+    if (location == "/" ||
+        location == "/intro" ||
+        location == "/login" ||
+        location == "/register" ||
+        location == "/forgot" ||
+        location == "/verify-email") {
+      return "/dashboard";
     }
 
     return null;
@@ -65,6 +79,22 @@ final appRouter = GoRouter(
     GoRoute(
       path: "/forgot",
       builder: (_, __) => const ForgotPasswordScreen(),
+    ),
+
+    GoRoute(
+      path: "/verify-email",
+      builder: (_, __) => const VerifyEmailScreen(),
+    ),
+
+
+    GoRoute(
+      path: "/terms",
+      builder: (_, __) => const TermsOfServiceScreen(),
+    ),
+
+    GoRoute(
+      path: "/privacy",
+      builder: (_, __) => const PrivacyPolicyScreen(),
     ),
 
     GoRoute(
