@@ -13,16 +13,10 @@ class IntroScreen extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            Positioned(
-              top: -180,
-              right: -180,
-              child: Container(
-                width: 420,
-                height: 420,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(.05),
-                  shape: BoxShape.circle,
-                ),
+            Positioned.fill(
+              child: Image.asset(
+                "assets/images/intro_background.png",
+                fit: BoxFit.cover,
               ),
             ),
             Padding(
@@ -35,7 +29,7 @@ class IntroScreen extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   Image.asset(
-                    "assets/images/ticket.png",
+                    "assets/images/logo.png",
                     width: 180,
                   ),
 
@@ -61,7 +55,7 @@ class IntroScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   Container(
-                    width: 70,
+                    width: 55,
                     height: 4,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
@@ -70,11 +64,6 @@ class IntroScreen extends StatelessWidget {
                   ),
 
                   const Spacer(),
-
-                  Image.asset(
-                    "assets/images/grocery_basket.png",
-                    width: 290,
-                  ),
 
                   const Spacer(),
 
@@ -105,7 +94,7 @@ class IntroScreen extends StatelessWidget {
                     child: const Text(
                       "Continue as Guest",
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

@@ -45,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
 
               Image.asset(
-                "assets/images/ticket.png",
+                "assets/images/logo.png",
                 width: 170,
               ),
 
