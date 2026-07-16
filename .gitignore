@@ -65,3 +65,4 @@ windows/flutter/ephemeral/
 .DS_Store
 *.log
 firebase-debug.log
+*.zip
