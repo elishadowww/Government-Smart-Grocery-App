@@ -11,6 +11,7 @@ import '../widgets/store_card.dart';
 import '../widgets/supermarket_bottom_sheet.dart';
 import 'supermarket_detail_screen.dart';
 import '../widgets/filter_bottom_sheet.dart';
+import '../widgets/location_error_card.dart';
 
 
 class MapScreen extends StatefulWidget {
@@ -33,7 +34,6 @@ class _MapScreenState extends State<MapScreen> {
   TextEditingController();
 
   List<SupermarketModel> _supermarkets = [];
-
   List<SupermarketModel> _filteredSupermarkets = [];
   bool _isLoading = false;
   String? _error;
@@ -41,6 +41,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _openOnly = false;
   double _minimumRating = 0;
   double _maximumDistance = 10;
+  String? _errorMessage;
 
   static const CameraPosition _initialCamera =
   CameraPosition(
@@ -57,6 +58,7 @@ class _MapScreenState extends State<MapScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadNearbySupermarkets();
+      _errorMessage = null;
     });
   }
 
@@ -70,7 +72,7 @@ class _MapScreenState extends State<MapScreen> {
     try {
       setState(() {
         _isLoading = true;
-        _error = null;
+        _errorMessage = null;
       });
 
       final position =
@@ -100,7 +102,7 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     } catch (e) {
-      _error = e.toString();
+      _errorMessage = e.toString();
       debugPrint(e.toString());
     } finally {
       if (mounted) {
@@ -199,7 +201,6 @@ class _MapScreenState extends State<MapScreen> {
           default:
             matchesCategory = true;
         }
-
 
         final matchesRating =
             store.rating >= _minimumRating;
@@ -300,8 +301,13 @@ class _MapScreenState extends State<MapScreen> {
         centerTitle: true,
       ),
 
-      body: Column(
-        children: [
+      body: _errorMessage != null
+          ? LocationErrorCard(
+        message: _errorMessage!,
+        onRetry: _loadNearbySupermarkets,
+      )
+          : Column(
+               children: [
 
           /// Search + Category
           MapHeader(
@@ -375,28 +381,12 @@ class _MapScreenState extends State<MapScreen> {
                     CircularProgressIndicator(),
                   ),
 
-                if (_error != null)
-                  Positioned(
-                    left: 16,
-                    right: 16,
-                    bottom: 16,
-                    child: Card(
-                      color: Colors.red.shade100,
-                      elevation: 3,
-                      child: Padding(
-                        padding:
-                        const EdgeInsets.all(16),
-                        child: Text(
-                          _error!,
-                          style:
-                          const TextStyle(
-                            color: Colors.red,
-                            fontWeight:
-                            FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                if (_errorMessage != null)
+                  LocationErrorCard(
+                    message: _errorMessage!,
+                    onRetry: () {
+                      _loadNearbySupermarkets();
+                    },
                   ),
 
                 if (!_isLoading &&
