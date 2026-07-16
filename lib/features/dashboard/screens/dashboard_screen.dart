@@ -17,11 +17,11 @@ class DashboardScreen extends StatelessWidget {
 
       body: Center(
         child: ElevatedButton(
-          onPressed: () async {
-            await repository.logout();
-          },
+          onPressed: () {
+            context.push("/nearby");
+          }, // onPressed: () async {await repository.logout();},//
           child: const Text(
-            "Logout",
+            "Nearby Supermarket",
           ),
         ),
       ),

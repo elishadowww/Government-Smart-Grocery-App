@@ -8,6 +8,7 @@ import '../../features/authentication/screens/register_screen.dart';
 import '../../features/authentication/screens/splash_screen.dart';
 import '../../features/authentication/services/auth_state_notifier.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
+import '../../features/nearby_supermarket/screens/map_screen.dart';
 
 final _authNotifier = AuthStateNotifier();
 
@@ -69,6 +70,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: "/dashboard",
       builder: (_, __) => const DashboardScreen(),
+    ),
+
+    GoRoute(
+      path: "/nearby",
+      builder: (_, __) => const MapScreen(),
     ),
   ],
 );
