@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "865924766479-o4evr3a5mefsdq1hifapene6sb6b1li7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.government_smart_grocery_app",
+            "certificate_hash": "8ebaa34fa106b93b2e551dcacb0763ceff32fea5"
+          }
+        },
+        {
+          "client_id": "865924766479-sqisc9a2sj73qp10ffgv77lubs94bf4h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.government_smart_grocery_app",
+            "certificate_hash": "72c6622297c91b7ad8cd46748471a62f419026e5"
+          }
+        },
+        {
           "client_id": "865924766479-pdfjhpnlatpq4d883m43qeae6pnebf3m.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +45,13 @@
             {
               "client_id": "865924766479-pdfjhpnlatpq4d883m43qeae6pnebf3m.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "865924766479-3pm7tt91ha5noa5410scl0a0gbev9n03.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.governmentSmartGroceryApp"
+              }
             }
           ]
         }
