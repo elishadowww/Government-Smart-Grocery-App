@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../repositories/auth_repositories.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,9 +14,121 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
+  bool _isLoading = false;
+
+  final _repository = AuthRepository();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  Future<void> _googleLogin() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _repository.googleLogin();
+
+      if (!mounted) return;
+
+      context.go("/dashboard");
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      if (e.code != "cancelled") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.message ?? "Google sign in failed.",
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+          ),
+        ),
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _login() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _repository.login(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      context.go("/dashboard");
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      String message = "Login failed.";
+
+      switch (e.code) {
+        case "invalid-email":
+        case "invalid-credential":
+        case "user-not-found":
+        case "wrong-password":
+          message = "Incorrect email or password.";
+          break;
+
+        case "user-disabled":
+          message = "This account has been disabled.";
+          break;
+
+        case "too-many-requests":
+          message = "Too many login attempts. Please try again later.";
+          break;
+
+        default:
+          message = "Login failed. Please try again.";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Something went wrong.",
+          ),
+        ),
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -165,26 +279,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
 
                 child: ElevatedButton(
-                  onPressed: () => context.go("/dashboard"),
-
-                  child: const Text(
+                  onPressed: _isLoading ? null : _login,
+                  child: _isLoading
+                      ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                      : const Text(
                     "Login",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
                   ),
-                ),
+                )
               ),
 
               const SizedBox(height: 26),
 
               Row(
                 children: [
-
                   const Expanded(child: Divider()),
 
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: Text(
-                      "or continue as guest",
+                      "or",
                       style: TextStyle(
                         color: Colors.grey.shade700,
                       ),
@@ -200,18 +323,31 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 54,
-
                 child: OutlinedButton(
-                  onPressed: () => context.go("/dashboard"),
-
-                  child: const Text(
-                    "Continue as Guest",
-                    style: TextStyle(fontSize: 16),
+                  onPressed: _isLoading ? null : _googleLogin,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.g_mobiledata,
+                        size: 28,
+                      ),
+                      SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          "Continue with Google",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 16),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
