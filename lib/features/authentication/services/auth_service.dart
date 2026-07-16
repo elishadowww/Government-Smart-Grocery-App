@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -42,6 +43,18 @@ class AuthService {
         fullName.trim(),
       );
 
+      try {
+        await userCredential.user!.sendEmailVerification();
+
+        debugPrint(
+          "Verification email requested for ${userCredential.user!.email}",
+        );
+      } catch (e) {
+        debugPrint(
+          "Failed to send verification email: $e",
+        );
+      }
+
       return userCredential;
     }
 
@@ -54,6 +67,18 @@ class AuthService {
     await userCredential.user!.updateDisplayName(
       fullName.trim(),
     );
+
+    try {
+      await userCredential.user!.sendEmailVerification();
+
+      debugPrint(
+        "Verification email requested for ${userCredential.user!.email}",
+      );
+    } catch (e) {
+      debugPrint(
+        "Failed to send verification email: $e",
+      );
+    }
 
     return userCredential;
   }
@@ -105,4 +130,33 @@ class AuthService {
   static Future<UserCredential> signInAnonymously() {
     return _auth.signInAnonymously();
   }
+
+  static Future<bool> isEmailVerified() async {
+    await _auth.currentUser?.reload();
+
+    return _auth.currentUser?.emailVerified ?? false;
+  }
+
+  static Future<void> resendVerificationEmail() async {
+    await _auth.currentUser?.sendEmailVerification();
+  }
+
+  static bool get requiresEmailVerification {
+    final user = _auth.currentUser;
+
+    if (user == null) return false;
+
+    if (user.isAnonymous) return false;
+
+    for (final provider in user.providerData) {
+      if (provider.providerId == "google.com") {
+        return false;
+      }
+    }
+
+    return !user.emailVerified;
+  }
+
+
+
 }
