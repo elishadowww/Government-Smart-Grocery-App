@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../repositories/auth_repositories.dart';
 
 class IntroScreen extends StatelessWidget {
   const IntroScreen({super.key});
@@ -90,7 +91,9 @@ class IntroScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   GestureDetector(
-                    onTap: () => context.go('/dashboard'),
+                    onTap: () async {
+                      await AuthRepository().signInAnonymously();
+                    },
                     child: const Text(
                       "Continue as Guest",
                       style: TextStyle(
