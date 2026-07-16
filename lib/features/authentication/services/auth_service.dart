@@ -23,13 +23,39 @@ class AuthService {
   }
 
   static Future<UserCredential> register({
+    required String fullName,
     required String email,
     required String password,
-  }) {
-    return _auth.createUserWithEmailAndPassword(
+  }) async {
+    if (_auth.currentUser?.isAnonymous ?? false) {
+      final credential = EmailAuthProvider.credential(
+        email: email.trim(),
+        password: password,
+      );
+
+      final userCredential =
+      await _auth.currentUser!.linkWithCredential(
+        credential,
+      );
+
+      await userCredential.user!.updateDisplayName(
+        fullName.trim(),
+      );
+
+      return userCredential;
+    }
+
+    final userCredential =
+    await _auth.createUserWithEmailAndPassword(
       email: email.trim(),
       password: password,
     );
+
+    await userCredential.user!.updateDisplayName(
+      fullName.trim(),
+    );
+
+    return userCredential;
   }
 
   static Future<void> sendPasswordReset(
@@ -74,5 +100,9 @@ class AuthService {
     await googleSignIn.signOut();
 
     await _auth.signOut();
+  }
+
+  static Future<UserCredential> signInAnonymously() {
+    return _auth.signInAnonymously();
   }
 }

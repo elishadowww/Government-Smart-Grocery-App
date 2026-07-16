@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "865924766479-1j5ho3qgphp7dhc38rdafd5052pcilfi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.government_smart_grocery_app",
+            "certificate_hash": "d0a169ab22721f0faccb52e221be9ecb82e10583"
+          }
+        },
+        {
+          "client_id": "865924766479-h70q60s1v3ku8s90dm30j94tejjn11vh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.government_smart_grocery_app",
+            "certificate_hash": "72723f042eb162724c51a60199b6618a1b692a1d"
+          }
+        },
+        {
           "client_id": "865924766479-o4evr3a5mefsdq1hifapene6sb6b1li7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -13,11 +13,13 @@ class AuthRepository {
     );
   }
 
-  Future<void> register({
+  Future<UserCredential> register({
+    required String fullName,
     required String email,
     required String password,
-  }) async {
-    await AuthService.register(
+  }) {
+    return AuthService.register(
+      fullName: fullName,
       email: email,
       password: password,
     );
@@ -35,5 +37,9 @@ class AuthRepository {
 
   Future<void> logout() async {
     await AuthService.logout();
+  }
+
+  Future<UserCredential> signInAnonymously() {
+    return AuthService.signInAnonymously();
   }
 }

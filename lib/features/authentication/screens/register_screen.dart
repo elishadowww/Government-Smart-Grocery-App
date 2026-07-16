@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../repositories/auth_repositories.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -11,6 +13,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _repository = AuthRepository();
+  final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -35,7 +40,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: Colors.white,
 
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
             horizontal: 28,
             vertical: 24,
@@ -71,7 +78,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               const SizedBox(height: 34),
 
-              TextField(
+              TextFormField(
                 controller: fullNameController,
                 decoration: InputDecoration(
                   hintText: "Full Name",
@@ -80,11 +87,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter your name";
+                  }
+
+                  return null;
+                },
               ),
 
               const SizedBox(height: 18),
 
-              TextField(
+              TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(
                   hintText: "Email Address",
@@ -93,11 +108,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter your email";
+                  }
+
+                  return null;
+                },
               ),
 
               const SizedBox(height: 18),
 
-              TextField(
+              TextFormField(
                 controller: passwordController,
                 obscureText: obscurePassword,
 
@@ -123,11 +146,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+
+                validator: (value) {
+                  if (value == null || value.length < 8) {
+                    return "Password must be at least 8 characters";
+                  }
+
+                  return null;
+                },
               ),
 
               const SizedBox(height: 18),
 
-              TextField(
+              TextFormField(
                 controller: confirmPasswordController,
                 obscureText: obscureConfirmPassword,
 
@@ -154,6 +185,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+
+                validator: (value) {
+                  if (value != passwordController.text) {
+                    return "Passwords do not match";
+                  }
+
+                  return null;
+                },
               ),
 
               const SizedBox(height: 14),
@@ -220,7 +259,53 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 54,
 
                 child: ElevatedButton(
-                  onPressed: () => context.go("/dashboard"),
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
+
+                    if (!agreeTerms) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Please accept the Terms of Service.",
+                          ),
+                        ),
+                      );
+
+                      return;
+                    }
+
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    try {
+                      await _repository.register(
+                        fullName: fullNameController.text,
+                        email: emailController.text,
+                        password: passwordController.text,
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      if (!mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            e.message ?? "Registration failed.",
+                          ),
+                        ),
+                      );
+                    } finally {
+                      if (mounted) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+                    }
+                  },
 
                   child: const Text(
                     "Register",
@@ -298,6 +383,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
