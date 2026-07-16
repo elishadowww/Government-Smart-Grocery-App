@@ -5,8 +5,10 @@ import '../../features/authentication/repositories/auth_repositories.dart';
 import '../../features/authentication/screens/forgot_password_screen.dart';
 import '../../features/authentication/screens/intro_screen.dart';
 import '../../features/authentication/screens/login_screen.dart';
+import '../../features/authentication/screens/privacy_policy_screen.dart';
 import '../../features/authentication/screens/register_screen.dart';
 import '../../features/authentication/screens/splash_screen.dart';
+import '../../features/authentication/screens/terms_of_service_screen.dart';
 import '../../features/authentication/screens/verify_email_screen.dart';
 import '../../features/authentication/services/auth_state_notifier.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
@@ -81,6 +83,17 @@ final appRouter = GoRouter(
     GoRoute(
       path: "/verify-email",
       builder: (_, __) => const VerifyEmailScreen(),
+    ),
+
+
+    GoRoute(
+      path: "/terms",
+      builder: (_, __) => const TermsOfServiceScreen(),
+    ),
+
+    GoRoute(
+      path: "/privacy",
+      builder: (_, __) => const PrivacyPolicyScreen(),
     ),
 
     GoRoute(

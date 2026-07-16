@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -238,36 +239,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   Expanded(
                     child: RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
+                      text: TextSpan(
+                        style: const TextStyle(
                           color: Colors.black87,
                           fontSize: 13,
                         ),
                         children: [
 
-                          TextSpan(
+                          const TextSpan(
                             text: "I agree to the ",
                           ),
 
                           TextSpan(
                             text: "Terms of Service",
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
                             ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                context.push("/terms");
+                              },
                           ),
 
-                          TextSpan(
+                          const TextSpan(
                             text: " and ",
                           ),
 
                           TextSpan(
                             text: "Privacy Policy",
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
                             ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                context.push("/privacy");
+                              },
                           ),
+
                         ],
                       ),
                     ),
