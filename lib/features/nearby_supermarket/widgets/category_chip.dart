@@ -42,7 +42,7 @@ class CategoryChip extends StatelessWidget {
         side: BorderSide.none,
         padding: const EdgeInsets.symmetric(
           horizontal: 10,
-          vertical: 8,
+          vertical: 2,
         ),
       ),
     );

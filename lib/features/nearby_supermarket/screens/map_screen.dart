@@ -3,16 +3,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/supermarket_model.dart';
 import '../services/location_service.dart';
 import '../services/supermarket_service.dart';
-import '../widgets/category_chip.dart';
-import '../widgets/map_header.dart';
-import '../widgets/route_button.dart';
-import '../widgets/search_bar.dart';
-import '../widgets/store_card.dart';
-import '../widgets/supermarket_bottom_sheet.dart';
-import 'supermarket_detail_screen.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/location_error_card.dart';
+import '../widgets/map_header.dart';
+import '../widgets/route_button.dart';
+import '../widgets/store_card.dart';
+import '../widgets/supermarket_bottom_sheet.dart';
 
+import 'supermarket_detail_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -22,26 +20,16 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final LocationService _locationService = LocationService();
+
+  final LocationService _locationService =
+  LocationService();
+
   final SupermarketService _supermarketService =
   SupermarketService();
 
   GoogleMapController? _mapController;
 
   final Set<Marker> _markers = {};
-
-  final TextEditingController _searchController =
-  TextEditingController();
-
-  List<SupermarketModel> _supermarkets = [];
-  List<SupermarketModel> _filteredSupermarkets = [];
-  bool _isLoading = false;
-  String? _error;
-  String _selectedCategory = "All";
-  bool _openOnly = false;
-  double _minimumRating = 0;
-  double _maximumDistance = 10;
-  String? _errorMessage;
 
   static const CameraPosition _initialCamera =
   CameraPosition(
@@ -52,20 +40,56 @@ class _MapScreenState extends State<MapScreen> {
     zoom: 14,
   );
 
+  final TextEditingController _searchController =
+  TextEditingController();
+
+  List<SupermarketModel> _supermarkets = [];
+  List<SupermarketModel> _filteredSupermarkets = [];
+
+  bool _isLoading = false;
+  String? _errorMessage;
+  String _selectedCategory = "All";
+  bool _openOnly = false;
+  double _minimumRating = 0;
+  double _maximumDistance = 10;
+
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) {
       _loadNearbySupermarkets();
-      _errorMessage = null;
     });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _mapController?.dispose();
+
     super.dispose();
+  }
+
+  Future<void> _goToCurrentLocation() async {
+    try {
+      final position =
+      await _locationService.getCurrentLocation();
+
+      _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(
+              position.latitude,
+              position.longitude,
+            ),
+            zoom: 16,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   Future<void> _loadNearbySupermarkets() async {
@@ -79,8 +103,7 @@ class _MapScreenState extends State<MapScreen> {
       await _locationService.getCurrentLocation();
 
       final supermarkets =
-      await _supermarketService
-          .getNearbySupermarkets(
+      await _supermarketService.getNearbySupermarkets(
         latitude: position.latitude,
         longitude: position.longitude,
       );
@@ -102,7 +125,12 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     } catch (e) {
-      _errorMessage = e.toString();
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
+
       debugPrint(e.toString());
     } finally {
       if (mounted) {
@@ -113,110 +141,74 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _filterStores(String keyword) {
-    _applyFilters();
-  }
-
-  void _changeCategory(String category) {
-    setState(() {
-      _selectedCategory = category;
-
-      if (category == "All") {
-        _filteredSupermarkets = List.from(_supermarkets);
-      } else {
-        _filteredSupermarkets = _supermarkets.where((store) {
-          final name = store.name.toLowerCase();
-
-          switch (category) {
-            case "Hypermarket":
-              return name.contains("hypermarket");
-
-            case "Convenience":
-              return name.contains("7-Eleven") ||
-                  name.contains("orange Convenience Store") ||
-                  name.contains("convenience");
-
-            case "Grocery":
-              return !name.contains("hypermarket") &&
-                  !name.contains("7-eleven") &&
-                  !name.contains("kk");
-
-            default:
-              return true;
-          }
-        }).toList();
-      }
-
-      _buildMarkers();
-    });
-  }
-
-  void _applyFilters() {
-    final keyword = _searchController.text.toLowerCase();
+    void _applyFilters() {
+    final keyword =
+    _searchController.text.toLowerCase();
 
     setState(() {
-      _filteredSupermarkets = _supermarkets.where((store) {
-        final name = store.name.toLowerCase();
-        final address = store.address.toLowerCase();
+      _filteredSupermarkets =
+          _supermarkets.where((store) {
+            final name = store.name.toLowerCase();
+            final address =
+            store.address.toLowerCase();
 
-        // Search filter
-        final matchesSearch =
-            keyword.isEmpty ||
-                name.contains(keyword) ||
-                address.contains(keyword);
+            final matchesSearch =
+                keyword.isEmpty ||
+                    name.contains(keyword) ||
+                    address.contains(keyword);
 
-        // Category filter
-        bool matchesCategory = true;
+            bool matchesCategory = true;
 
-        switch (_selectedCategory) {
-          case "Hypermarket":
-            matchesCategory =
-                name.contains("hypermarket") ||
-                    name.contains("lotus") ||
-                    name.contains("aeon") ||
-                    name.contains("servay");
-            break;
+            switch (_selectedCategory) {
+              case "Hypermarket":
+                matchesCategory =
+                    name.contains("hypermarket") ||
+                        name.contains("lotus") ||
+                        name.contains("aeon") ||
+                        name.contains("servay");
+                break;
 
-          case "Convenience":
-            matchesCategory =
-                name.contains("7-eleven") ||
-                    name.contains("family") ||
-                    name.contains("speedmart") ||
-                    name.contains("orange") ||
-                    name.contains("kk") ||
-                    name.contains("mart");
-            break;
+              case "Convenience":
+                matchesCategory =
+                    name.contains("7-eleven") ||
+                        name.contains("family") ||
+                        name.contains("speedmart") ||
+                        name.contains("orange") ||
+                        name.contains("kk") ||
+                        name.contains("mart");
+                break;
 
-          case "Grocery":
-            matchesCategory =
-                !name.contains("hypermarket") &&
-                    !name.contains("lotus") &&
-                    !name.contains("aeon") &&
-                    !name.contains("family") &&
-                    !name.contains("7-eleven") &&
-                    !name.contains("speedmart");
-            break;
+              case "Grocery":
+                matchesCategory =
+                    !name.contains("hypermarket") &&
+                        !name.contains("lotus") &&
+                        !name.contains("aeon") &&
+                        !name.contains("family") &&
+                        !name.contains("7-eleven") &&
+                        !name.contains("speedmart");
+                break;
 
-          case "All":
-          default:
-            matchesCategory = true;
-        }
+              case "All":
+              default:
+                matchesCategory = true;
+            }
 
-        final matchesRating =
-            store.rating >= _minimumRating;
+            final matchesRating =
+                store.rating >= _minimumRating;
 
-        final matchesOpen =
-            !_openOnly || store.isOpen;
+            final matchesOpen =
+                !_openOnly || store.isOpen;
 
-        final matchesDistance =
-            store.distance <= _maximumDistance;
+            final matchesDistance =
+                store.distance <=
+                    _maximumDistance;
 
-        return matchesSearch &&
-            matchesCategory &&
-            matchesRating &&
-            matchesOpen &&
-            matchesDistance;
-      }).toList();
+            return matchesSearch &&
+                matchesCategory &&
+                matchesRating &&
+                matchesOpen &&
+                matchesDistance;
+          }).toList();
 
       _buildMarkers();
     });
@@ -229,17 +221,20 @@ class _MapScreenState extends State<MapScreen> {
     in _filteredSupermarkets) {
       _markers.add(
         Marker(
-          markerId: MarkerId(
-            supermarket.id,
-          ),
+          markerId:
+          MarkerId(supermarket.id),
+
           position: LatLng(
             supermarket.latitude,
             supermarket.longitude,
           ),
+
           infoWindow: InfoWindow(
             title: supermarket.name,
-            snippet: supermarket.address,
+            snippet:
+            "${supermarket.distance.toStringAsFixed(1)} km • ${supermarket.address}",
           ),
+
           onTap: () {
             _showSupermarketBottomSheet(
               supermarket,
@@ -253,9 +248,9 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {});
     }
   }
+
   void _showSupermarketBottomSheet(
-      SupermarketModel supermarket,
-      ) {
+      SupermarketModel supermarket) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -306,136 +301,140 @@ class _MapScreenState extends State<MapScreen> {
         message: _errorMessage!,
         onRetry: _loadNearbySupermarkets,
       )
-          : Column(
-               children: [
+          : Stack(
+        children: [
 
-          /// Search + Category
-          MapHeader(
-            searchController: _searchController,
-            selectedCategory: _selectedCategory,
-            onSearchChanged: (value) {
-              _applyFilters();
-            },
-            onCategoryChanged: (value) {
-              _selectedCategory = value;
-              _applyFilters();
-            },
-            onFilterPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (_) {
-                  return FilterBottomSheet(
-                    openOnly: _openOnly,
-                    minimumRating: _minimumRating,
-                    maximumDistance: _maximumDistance,
+      Positioned.fill(
+      child: GoogleMap(
+      initialCameraPosition: _initialCamera,
 
-                    onApply: (
-                        openOnly,
-                        rating,
-                        distance,
-                        ) {
+        onMapCreated: (controller) {
+          _mapController = controller;
+        },
 
-                      _openOnly = openOnly;
-                      _minimumRating = rating;
-                      _maximumDistance = distance;
+        myLocationEnabled: true,
+        myLocationButtonEnabled: false,
 
-                      _applyFilters();
-                    },
-                  );
-                },
-              );
-            },
-          ),
+        zoomControlsEnabled: true,
+        compassEnabled: true,
+        buildingsEnabled: true,
+        mapToolbarEnabled: false,
 
-          Expanded(
-            child: Stack(
-              children: [
+        markers: _markers,
+      ),
+    ),
 
-                GoogleMap(
-                  initialCameraPosition:
-                  _initialCamera,
+    if (_isLoading)
+    const Center(
+    child: CircularProgressIndicator(),
+    ),
 
-                  onMapCreated:
-                      (GoogleMapController controller) {
-                    _mapController = controller;
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  0,
+                  0,
+                  0,
+                  0,
+                ),
+                child: MapHeader(
+                  searchController: _searchController,
+                  selectedCategory: _selectedCategory,
+
+                  onSearchChanged: (_) {
+                    _applyFilters();
                   },
 
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
+                  onCategoryChanged: (value) {
+                    _selectedCategory = value;
+                    _applyFilters();
+                  },
 
-                  zoomControlsEnabled: true,
-
-                  compassEnabled: true,
-
-                  buildingsEnabled: true,
-
-                  mapToolbarEnabled: false,
-
-                  markers: _markers,
+                  onFilterPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) {
+                        return FilterBottomSheet(
+                          openOnly: _openOnly,
+                          minimumRating: _minimumRating,
+                          maximumDistance: _maximumDistance,
+                          onApply: (
+                              openOnly,
+                              rating,
+                              distance,
+                              ) {
+                            _openOnly = openOnly;
+                            _minimumRating = rating;
+                            _maximumDistance = distance;
+                            _applyFilters();
+                          },
+                        );
+                      },
+                    );
+                  },
                 ),
+              ),
+            ),
+          ),
 
-                if (_isLoading)
-                  const Center(
-                    child:
-                    CircularProgressIndicator(),
+          Positioned(
+            right: 16,
+            bottom: 280,
+            child: FloatingActionButton.small(
+              heroTag: "locationButton",
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              elevation: 4,
+              onPressed: _goToCurrentLocation,
+              child: const Icon(Icons.my_location),
+            ),
+          ),
+
+          DraggableScrollableSheet(
+            initialChildSize: 0.32,
+            minChildSize: 0.18,
+            maxChildSize: 0.85,
+            snap: true,
+            snapSizes: const [0.25, 0.50, 0.75],
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(24),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 12,
+                      offset: Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
 
-                if (_errorMessage != null)
-                  LocationErrorCard(
-                    message: _errorMessage!,
-                    onRetry: () {
-                      _loadNearbySupermarkets();
-                    },
-                  ),
-
-                if (!_isLoading &&
-                    _error == null &&
-                    _filteredSupermarkets
-                        .isEmpty)
-                  const Center(
-                    child: Card(
-                      child: Padding(
-                        padding:
-                        EdgeInsets.all(20),
-                        child: Text(
-                          "No supermarkets found.",
-                          style: TextStyle(
-                            fontSize: 18,
-                          ),
-                        ),
+                    Container(
+                      width: 45,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                  ),
 
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.38,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(24),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 10,
-                          color: Colors.black12,
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        16,
-                        16,
-                        16,
-                        0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    const SizedBox(height: 12),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
                         children: [
-
                           const Text(
                             "Nearby Stores",
                             style: TextStyle(
@@ -443,39 +442,60 @@ class _MapScreenState extends State<MapScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-
-                          const SizedBox(height: 12),
-
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount:
-                              _filteredSupermarkets.length,
-
-                              itemBuilder:
-                                  (context, index) {
-                                final supermarket =
-                                _filteredSupermarkets[
-                                index];
-
-                                return StoreCard(
-                                  supermarket: supermarket,
-
-                                  onTap: () {
-                                    _showSupermarketBottomSheet(
-                                      supermarket,
-                                    );
-                                  },
-                                );
-                              },
+                          const Spacer(),
+                          Text(
+                            "${_filteredSupermarkets.length} found",
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+
+                    const SizedBox(height: 8),
+
+                    Expanded(
+                      child: _filteredSupermarkets.isEmpty
+                          ? const Center(
+                        child: Text(
+                          "No supermarkets found.",
+                        ),
+                      )
+                          : ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.fromLTRB(
+                            16, 8, 16, 20),
+                        itemCount: _filteredSupermarkets.length,
+                        itemBuilder: (context, index) {
+                          final supermarket =
+                          _filteredSupermarkets[index];
+
+                          return StoreCard(
+                            supermarket: supermarket,
+                            onTap: () {
+                              _mapController?.animateCamera(
+                                CameraUpdate.newLatLngZoom(
+                                  LatLng(
+                                    supermarket.latitude,
+                                    supermarket.longitude,
+                                  ),
+                                  17,
+                                ),
+                              );
+
+                              _showSupermarketBottomSheet(
+                                supermarket,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),
