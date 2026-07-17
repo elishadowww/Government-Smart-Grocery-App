@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'category_chip.dart';
 import 'search_bar.dart';
 
@@ -20,14 +21,21 @@ class MapHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      elevation: 3,
-      borderRadius: const BorderRadius.vertical(
-        bottom: Radius.circular(20),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -37,11 +45,13 @@ class MapHeader extends StatelessWidget {
               onFilterPressed: onFilterPressed,
             ),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 8),
 
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+            SizedBox(
+              height: 42,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 children: [
                   CategoryChip(
                     label: "All",
@@ -70,8 +80,7 @@ class MapHeader extends StatelessWidget {
                     label: "Convenience",
                     icon: Icons.local_convenience_store,
                     isSelected:
-                    selectedCategory ==
-                        "Convenience",
+                    selectedCategory == "Convenience",
                     onTap: () =>
                         onCategoryChanged("Convenience"),
                   ),
