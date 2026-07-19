@@ -68,3 +68,12 @@ firebase-debug.log
 *.zip
 
 .env
+
+# =========================
+# PriceCatcher import
+# =========================
+
+data/
+scripts/.venv/
+serviceAccountKey.json
+*serviceAccountKey*.json
