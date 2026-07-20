@@ -24,6 +24,7 @@ data/
   lookup_item.csv
   lookup_premise.csv
   pricecatcher.csv
+  pricecatcher/
 ```
 
 ## Run

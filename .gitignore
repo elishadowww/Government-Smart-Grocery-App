@@ -75,6 +75,7 @@ firebase-debug.log
 
 data/
 scripts/.venv/
+keys/
 serviceAccountKey.json
 *serviceAccountKey*.json
 smart-grocery-3b932-firebase-adminsdk-fbsvc-d1d4dd1a7b.json
