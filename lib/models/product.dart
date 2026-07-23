@@ -1,11 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-import '../core/constants/firestore_constants.dart';
+import '../core/constants/database_constants.dart';
 
 /// A grocery product from the PriceCatcher `lookup_item` dataset.
 ///
-/// Maps 1:1 to a document in the `products` Firestore collection, keyed by
+/// Maps 1:1 to a row in the local SQLite `products` table, keyed by
 /// [itemCode].
 class Product extends Equatable {
   const Product({
@@ -22,28 +21,24 @@ class Product extends Equatable {
   final String itemGroup;
   final String itemCategory;
 
-  factory Product.fromMap(String itemCode, Map<String, dynamic> map) {
+  factory Product.fromMap(Map<String, Object?> row) {
     return Product(
-      itemCode: itemCode,
-      name: map[ProductFields.name] as String? ?? '',
-      unit: map[ProductFields.unit] as String? ?? '',
-      itemGroup: map[ProductFields.itemGroup] as String? ?? '',
-      itemCategory: map[ProductFields.itemCategory] as String? ?? '',
+      itemCode: row[ProductColumns.itemCode] as String? ?? '',
+      name: row[ProductColumns.name] as String? ?? '',
+      unit: row[ProductColumns.unit] as String? ?? '',
+      itemGroup: row[ProductColumns.itemGroup] as String? ?? '',
+      itemCategory: row[ProductColumns.itemCategory] as String? ?? '',
     );
   }
 
-  factory Product.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    return Product.fromMap(doc.id, doc.data() ?? const {});
-  }
-
-  Map<String, dynamic> toMap() {
+  Map<String, Object?> toMap() {
     return {
-      ProductFields.itemCode: itemCode,
-      ProductFields.name: name,
-      ProductFields.nameLower: name.toLowerCase(),
-      ProductFields.unit: unit,
-      ProductFields.itemGroup: itemGroup,
-      ProductFields.itemCategory: itemCategory,
+      ProductColumns.itemCode: itemCode,
+      ProductColumns.name: name,
+      ProductColumns.nameLower: name.toLowerCase(),
+      ProductColumns.unit: unit,
+      ProductColumns.itemGroup: itemGroup,
+      ProductColumns.itemCategory: itemCategory,
     };
   }
 

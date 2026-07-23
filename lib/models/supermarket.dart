@@ -1,12 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-import '../core/constants/firestore_constants.dart';
+import '../core/constants/database_constants.dart';
 
 /// A supermarket / premise from the PriceCatcher `lookup_premise` dataset.
 ///
-/// Maps 1:1 to a document in the `supermarkets` Firestore collection, keyed
-/// by [premiseCode].
+/// Maps 1:1 to a row in the local SQLite `supermarkets` table, keyed by
+/// [premiseCode].
 class Supermarket extends Equatable {
   const Supermarket({
     required this.premiseCode,
@@ -24,31 +23,25 @@ class Supermarket extends Equatable {
   final String district;
   final String state;
 
-  factory Supermarket.fromMap(String premiseCode, Map<String, dynamic> map) {
+  factory Supermarket.fromMap(Map<String, Object?> row) {
     return Supermarket(
-      premiseCode: premiseCode,
-      name: map[SupermarketFields.name] as String? ?? '',
-      address: map[SupermarketFields.address] as String? ?? '',
-      premiseType: map[SupermarketFields.premiseType] as String? ?? '',
-      district: map[SupermarketFields.district] as String? ?? '',
-      state: map[SupermarketFields.state] as String? ?? '',
+      premiseCode: row[SupermarketColumns.premiseCode] as String? ?? '',
+      name: row[SupermarketColumns.name] as String? ?? '',
+      address: row[SupermarketColumns.address] as String? ?? '',
+      premiseType: row[SupermarketColumns.premiseType] as String? ?? '',
+      district: row[SupermarketColumns.district] as String? ?? '',
+      state: row[SupermarketColumns.state] as String? ?? '',
     );
   }
 
-  factory Supermarket.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    return Supermarket.fromMap(doc.id, doc.data() ?? const {});
-  }
-
-  Map<String, dynamic> toMap() {
+  Map<String, Object?> toMap() {
     return {
-      SupermarketFields.premiseCode: premiseCode,
-      SupermarketFields.name: name,
-      SupermarketFields.address: address,
-      SupermarketFields.premiseType: premiseType,
-      SupermarketFields.district: district,
-      SupermarketFields.state: state,
+      SupermarketColumns.premiseCode: premiseCode,
+      SupermarketColumns.name: name,
+      SupermarketColumns.address: address,
+      SupermarketColumns.premiseType: premiseType,
+      SupermarketColumns.district: district,
+      SupermarketColumns.state: state,
     };
   }
 

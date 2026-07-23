@@ -18,6 +18,6 @@ final productSearchProvider =
 });
 
 final productsByCategoryProvider =
-    StreamProvider.family<List<Product>, String>((ref, itemCategory) {
-  return ref.watch(productRepositoryProvider).watchByCategory(itemCategory);
+    FutureProvider.family<List<Product>, String>((ref, itemCategory) {
+  return ref.watch(productRepositoryProvider).getByCategory(itemCategory);
 });

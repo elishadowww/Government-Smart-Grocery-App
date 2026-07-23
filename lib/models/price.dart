@@ -1,14 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-import '../core/constants/firestore_constants.dart';
+import '../core/constants/database_constants.dart';
 
 /// A single price observation for a product at a supermarket on a given
-/// date, sourced from PriceCatcher's `pricecatcher.csv`.
+/// date, sourced from PriceCatcher's `pricecatcher.csv` files.
 ///
-/// This model backs both Firestore collections that share the same shape:
-/// - `prices`: full history, doc id `{itemCode}_{premiseCode}_{date}`
-/// - `latest_prices`: one doc per (item, premise), the most recent price —
+/// This model backs both SQLite tables that share the same shape:
+/// - `prices`: full history, one row per (item, premise, date)
+/// - `latest_prices`: one row per (item, premise), the most recent price —
 ///   what price-comparison screens should query.
 class Price extends Equatable {
   const Price({
@@ -23,23 +22,20 @@ class Price extends Equatable {
   final DateTime date;
   final double price;
 
-  factory Price.fromMap(Map<String, dynamic> map) {
+  factory Price.fromMap(Map<String, Object?> row) {
     return Price(
-      itemCode: map[PriceFields.itemCode] as String? ?? '',
-      premiseCode: map[PriceFields.premiseCode] as String? ?? '',
-      date: _parseDate(map[PriceFields.date]),
-      price: (map[PriceFields.price] as num?)?.toDouble() ?? 0,
+      itemCode: row[PriceColumns.itemCode] as String? ?? '',
+      premiseCode: row[PriceColumns.premiseCode] as String? ?? '',
+      date: _parseDate(row[PriceColumns.date] as String?),
+      price: (row[PriceColumns.price] as num?)?.toDouble() ?? 0,
     );
   }
 
-  factory Price.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    return Price.fromMap(doc.data() ?? const {});
-  }
-
-  static DateTime _parseDate(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is String) return DateTime.parse(value);
-    return DateTime.fromMillisecondsSinceEpoch(0);
+  static DateTime _parseDate(String? value) {
+    if (value == null || value.isEmpty) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+    return DateTime.parse(value);
   }
 
   static String _formatDate(DateTime date) {
@@ -49,18 +45,12 @@ class Price extends Equatable {
     return '$y-$m-$d';
   }
 
-  /// Deterministic doc id for the `prices` history collection.
-  String get historyDocId => '${itemCode}_${premiseCode}_${_formatDate(date)}';
-
-  /// Deterministic doc id for the `latest_prices` comparison collection.
-  String get latestDocId => '${itemCode}_$premiseCode';
-
-  Map<String, dynamic> toMap() {
+  Map<String, Object?> toMap() {
     return {
-      PriceFields.itemCode: itemCode,
-      PriceFields.premiseCode: premiseCode,
-      PriceFields.date: _formatDate(date),
-      PriceFields.price: price,
+      PriceColumns.itemCode: itemCode,
+      PriceColumns.premiseCode: premiseCode,
+      PriceColumns.date: _formatDate(date),
+      PriceColumns.price: price,
     };
   }
 

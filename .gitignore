@@ -70,11 +70,19 @@ firebase-debug.log
 .env
 
 # =========================
-# PriceCatcher import
+# PriceCatcher data / local SQLite database
 # =========================
 
 data/
-scripts/.venv/
+tools/db_builder/.venv/
+
+# The built database is too large for git and is distributed separately
+# (see tools/db_builder/README.md) — keep the folder (.gitkeep) but not the
+# .db file itself.
+assets/database/*.db
+
+# Leftover from the retired Firestore importer — no longer used, but kept
+# ignored defensively in case a credential file reappears here.
 keys/
 serviceAccountKey.json
 *serviceAccountKey*.json

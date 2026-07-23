@@ -1,0 +1,4 @@
+# No external dependencies — build_pricecatcher_db.py only uses the Python
+# standard library (csv, sqlite3, argparse, pathlib). A virtualenv is still
+# recommended for isolation, but `pip install -r requirements.txt` is a
+# no-op here on purpose.

@@ -1,67 +1,58 @@
-import '../core/constants/firestore_constants.dart';
-import '../core/services/firestore_service.dart';
+import '../core/constants/database_constants.dart';
+import '../core/services/database_service.dart';
 import '../models/product.dart';
 
-/// Data access for the `products` Firestore collection.
+/// Data access for the local SQLite `products` table.
 class ProductRepository {
-  ProductRepository({FirestoreService? firestoreService})
-      : _firestoreService = firestoreService ?? FirestoreService();
+  ProductRepository({DatabaseService? databaseService})
+      : _databaseService = databaseService ?? DatabaseService();
 
-  final FirestoreService _firestoreService;
-
-  static const _collectionPath = FirestoreCollections.products;
+  final DatabaseService _databaseService;
 
   Future<Product?> getById(String itemCode) async {
-    final doc = await _firestoreService
-        .collection(_collectionPath)
-        .doc(itemCode)
-        .get();
-    if (!doc.exists) return null;
-    return Product.fromFirestore(doc);
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      DatabaseTables.products,
+      where: '${ProductColumns.itemCode} = ?',
+      whereArgs: [itemCode],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Product.fromMap(rows.first);
   }
 
-  /// Prefix search over the lowercased product name.
-  ///
-  /// Relies on the `nameLower` field written by the import script, since
-  /// Firestore has no native full-text search.
+  /// Substring search over the product name (case-insensitive via the
+  /// precomputed `name_lower` column).
   Future<List<Product>> searchByName(String query, {int limit = 20}) async {
-    final lower = query.trim().toLowerCase();
-    if (lower.isEmpty) return const [];
+    final term = query.trim().toLowerCase();
+    if (term.isEmpty) return const [];
 
-    final snapshot = await _firestoreService
-        .collection(_collectionPath)
-        .orderBy(ProductFields.nameLower)
-        .startAt([lower])
-        .endAt(['$lower'])
-        .limit(limit)
-        .get();
-
-    return snapshot.docs.map(Product.fromFirestore).toList();
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      DatabaseTables.products,
+      where: '${ProductColumns.nameLower} LIKE ?',
+      whereArgs: ['%$term%'],
+      orderBy: ProductColumns.nameLower,
+      limit: limit,
+    );
+    return rows.map(Product.fromMap).toList();
   }
 
   Future<List<Product>> getByCategory(String itemCategory, {int limit = 50}) async {
-    final snapshot = await _firestoreService
-        .collection(_collectionPath)
-        .where(ProductFields.itemCategory, isEqualTo: itemCategory)
-        .orderBy(ProductFields.nameLower)
-        .limit(limit)
-        .get();
-
-    return snapshot.docs.map(Product.fromFirestore).toList();
-  }
-
-  Stream<List<Product>> watchByCategory(String itemCategory) {
-    return _firestoreService
-        .collection(_collectionPath)
-        .where(ProductFields.itemCategory, isEqualTo: itemCategory)
-        .orderBy(ProductFields.nameLower)
-        .snapshots()
-        .map((snap) => snap.docs.map(Product.fromFirestore).toList());
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      DatabaseTables.products,
+      where: '${ProductColumns.itemCategory} = ?',
+      whereArgs: [itemCategory],
+      orderBy: ProductColumns.nameLower,
+      limit: limit,
+    );
+    return rows.map(Product.fromMap).toList();
   }
 
   Future<List<Product>> getAll({int limit = 50}) async {
-    final snapshot =
-        await _firestoreService.collection(_collectionPath).limit(limit).get();
-    return snapshot.docs.map(Product.fromFirestore).toList();
+    final db = await _databaseService.database;
+    final rows = await db.query(DatabaseTables.products, limit: limit);
+    return rows.map(Product.fromMap).toList();
   }
 }

@@ -1,14 +1,14 @@
-import '../core/constants/firestore_constants.dart';
-import '../core/services/firestore_service.dart';
+import '../core/constants/database_constants.dart';
+import '../core/services/database_service.dart';
 import '../models/price.dart';
 
-/// Data access for price data: the `latest_prices` comparison view and the
-/// `prices` full history collection.
+/// Data access for price data: the `latest_prices` comparison table and the
+/// `prices` full history table.
 class PriceRepository {
-  PriceRepository({FirestoreService? firestoreService})
-      : _firestoreService = firestoreService ?? FirestoreService();
+  PriceRepository({DatabaseService? databaseService})
+      : _databaseService = databaseService ?? DatabaseService();
 
-  final FirestoreService _firestoreService;
+  final DatabaseService _databaseService;
 
   /// Current price for [itemCode] at every supermarket that stocks it,
   /// cheapest first. This is what Module 1's price-comparison screen
@@ -17,23 +17,28 @@ class PriceRepository {
     String itemCode, {
     int limit = 100,
   }) async {
-    final snapshot = await _firestoreService
-        .collection(FirestoreCollections.latestPrices)
-        .where(PriceFields.itemCode, isEqualTo: itemCode)
-        .orderBy(PriceFields.price)
-        .limit(limit)
-        .get();
-    return snapshot.docs.map(Price.fromFirestore).toList();
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      DatabaseTables.latestPrices,
+      where: '${PriceColumns.itemCode} = ?',
+      whereArgs: [itemCode],
+      orderBy: PriceColumns.price,
+      limit: limit,
+    );
+    return rows.map(Price.fromMap).toList();
   }
 
   /// Current price for [itemCode] at a single [premiseCode], if any.
   Future<Price?> getLatestPrice(String itemCode, String premiseCode) async {
-    final doc = await _firestoreService
-        .collection(FirestoreCollections.latestPrices)
-        .doc('${itemCode}_$premiseCode')
-        .get();
-    if (!doc.exists) return null;
-    return Price.fromFirestore(doc);
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      DatabaseTables.latestPrices,
+      where: '${PriceColumns.itemCode} = ? AND ${PriceColumns.premiseCode} = ?',
+      whereArgs: [itemCode, premiseCode],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Price.fromMap(rows.first);
   }
 
   /// Historical prices for [itemCode], optionally scoped to one
@@ -45,24 +50,33 @@ class PriceRepository {
     DateTime? since,
     int limit = 200,
   }) async {
-    var query = _firestoreService
-        .collection(FirestoreCollections.prices)
-        .where(PriceFields.itemCode, isEqualTo: itemCode);
+    final db = await _databaseService.database;
+    final where = StringBuffer('${PriceColumns.itemCode} = ?');
+    final args = <Object?>[itemCode];
 
     if (premiseCode != null) {
-      query = query.where(PriceFields.premiseCode, isEqualTo: premiseCode);
+      where.write(' AND ${PriceColumns.premiseCode} = ?');
+      args.add(premiseCode);
     }
-
-    query = query.orderBy(PriceFields.date);
-
     if (since != null) {
-      final sinceStr = since.toIso8601String().split('T').first;
-      // Cursor values must line up with the query's orderBy clauses — here
-      // that's just `date`, since itemCode/premiseCode are equality filters.
-      query = query.startAt([sinceStr]);
+      where.write(' AND ${PriceColumns.date} >= ?');
+      args.add(_isoDate(since));
     }
 
-    final snapshot = await query.limit(limit).get();
-    return snapshot.docs.map(Price.fromFirestore).toList();
+    final rows = await db.query(
+      DatabaseTables.prices,
+      where: where.toString(),
+      whereArgs: args,
+      orderBy: PriceColumns.date,
+      limit: limit,
+    );
+    return rows.map(Price.fromMap).toList();
+  }
+
+  static String _isoDate(DateTime date) {
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
   }
 }
