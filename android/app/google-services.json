@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "865924766479-9qbnghf4pnumpcufog00r16ucu575aj8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.government_smart_grocery_app",
+            "certificate_hash": "3e42c1d0546c1e147b463891ee63a7839b42f2f7"
+          }
+        },
+        {
           "client_id": "865924766479-h70q60s1v3ku8s90dm30j94tejjn11vh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
