@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -65,6 +62,16 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDuWzLyKhV5-DUOq0tOmUDhPEn1l_w0_8g',
+    appId: '1:865924766479:ios:c30c570598f19dd428bc7a',
+    messagingSenderId: '865924766479',
+    projectId: 'smart-grocery-3b932',
+    storageBucket: 'smart-grocery-3b932.firebasestorage.app',
+    iosClientId: '865924766479-3pm7tt91ha5noa5410scl0a0gbev9n03.apps.googleusercontent.com',
+    iosBundleId: 'com.example.governmentSmartGroceryApp',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyDuWzLyKhV5-DUOq0tOmUDhPEn1l_w0_8g',
     appId: '1:865924766479:ios:c30c570598f19dd428bc7a',
     messagingSenderId: '865924766479',
