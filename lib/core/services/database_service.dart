@@ -58,7 +58,9 @@ class DatabaseService {
 
   /// Only used to make the progress bar move smoothly before the final
   /// part; the copy loop itself doesn't depend on this being accurate.
-  static const int _expectedPartsHint = 5;
+  /// Current split (see assets/database/) is 16 parts at 90MB each, sized
+  /// to stay under GitHub's 100MB per-file push limit.
+  static const int _expectedPartsHint = 16;
 
   /// First-launch copy can take a while on slow storage; past this, surface
   /// a clear error instead of leaving the user staring at a spinner forever.
