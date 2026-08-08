@@ -73,6 +73,39 @@ class PriceRepository {
     return rows.map(Price.fromMap).toList();
   }
 
+  /// Cheapest current price for each of [itemCodes], one row per item —
+  /// backs product search result cards, which show only the cheapest price
+  /// and store per product (spec §7.3 Product Card).
+  Future<Map<String, Price>> getCheapestPrices(List<String> itemCodes) async {
+    if (itemCodes.isEmpty) return const {};
+    final db = await _databaseService.database;
+    final placeholders = List.filled(itemCodes.length, '?').join(',');
+
+    final rows = await db.rawQuery(
+      '''
+      SELECT lp.* FROM ${DatabaseTables.latestPrices} lp
+      INNER JOIN (
+        SELECT ${PriceColumns.itemCode}, MIN(${PriceColumns.price}) AS min_price
+        FROM ${DatabaseTables.latestPrices}
+        WHERE ${PriceColumns.itemCode} IN ($placeholders)
+        GROUP BY ${PriceColumns.itemCode}
+      ) cheapest
+        ON lp.${PriceColumns.itemCode} = cheapest.${PriceColumns.itemCode}
+       AND lp.${PriceColumns.price} = cheapest.min_price
+      ''',
+      itemCodes,
+    );
+
+    final result = <String, Price>{};
+    for (final row in rows) {
+      final price = Price.fromMap(row);
+      // A tie at the same cheapest price across stores can return more than
+      // one row per item; keep the first and ignore the rest.
+      result.putIfAbsent(price.itemCode, () => price);
+    }
+    return result;
+  }
+
   static String _isoDate(DateTime date) {
     final y = date.year.toString().padLeft(4, '0');
     final m = date.month.toString().padLeft(2, '0');

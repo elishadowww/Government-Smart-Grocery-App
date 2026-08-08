@@ -66,6 +66,9 @@ windows/flutter/ephemeral/
 *.log
 firebase-debug.log
 *.zip
+*.pdf
+assets/temp
+assets/database
 
 .env
 

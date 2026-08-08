@@ -13,6 +13,12 @@ import '../../features/authentication/screens/verify_email_screen.dart';
 import '../../features/authentication/services/auth_state_notifier.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/nearby_supermarket/screens/map_screen.dart';
+import '../../features/notification/screens/notification_center_screen.dart';
+import '../../features/product_search/screens/price_comparison_screen.dart';
+import '../../features/product_search/screens/product_detail_screen.dart';
+import '../../features/product_search/screens/search_screen.dart';
+import '../../features/saved_products/screens/saved_products_screen.dart';
+import '../../features/shopping_list/screens/shopping_list_screen.dart';
 
 final _authNotifier = AuthStateNotifier();
 
@@ -105,6 +111,36 @@ final appRouter = GoRouter(
     GoRoute(
       path: "/nearby",
       builder: (_, __) => const MapScreen(),
+    ),
+
+    GoRoute(
+      path: "/search",
+      builder: (_, __) => const SearchScreen(),
+    ),
+
+    GoRoute(
+      path: "/product/:itemCode",
+      builder: (_, state) => ProductDetailScreen(itemCode: state.pathParameters["itemCode"]!),
+    ),
+
+    GoRoute(
+      path: "/compare/:itemCode",
+      builder: (_, state) => PriceComparisonScreen(itemCode: state.pathParameters["itemCode"]!),
+    ),
+
+    GoRoute(
+      path: "/saved",
+      builder: (_, __) => const SavedProductsScreen(),
+    ),
+
+    GoRoute(
+      path: "/notifications",
+      builder: (_, __) => const NotificationCenterScreen(),
+    ),
+
+    GoRoute(
+      path: "/shopping-list",
+      builder: (_, __) => const ShoppingListScreen(),
     ),
   ],
 );
