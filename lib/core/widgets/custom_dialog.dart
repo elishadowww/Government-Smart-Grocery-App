@@ -8,7 +8,7 @@ import 'app_button.dart';
 /// tapped Login (and was navigated there), false/null on Cancel.
 Future<bool?> showLoginRequiredDialog(
   BuildContext context, {
-  String message = 'Please log in to save products and receive price alerts.',
+  String message = 'Please log in to save favourites and receive price alerts.',
 }) {
   return showDialog<bool>(
     context: context,

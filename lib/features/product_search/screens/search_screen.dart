@@ -10,6 +10,7 @@ import '../../../core/utils/category_icons.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_search_bar.dart';
 import '../../../core/widgets/app_skeleton.dart';
+import '../../../core/widgets/cart_app_bar_action.dart';
 import '../../../core/widgets/custom_dialog.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/widgets/inline_error.dart';
@@ -242,22 +243,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     if (isSaved) {
       await controller.unsave(product.itemCode);
-      if (mounted) showAppSnackBar(context, 'Removed from saved products');
+      if (mounted) showAppSnackBar(context, 'Removed from favourites');
     } else {
       await controller.save(product.itemCode);
-      if (mounted) showAppSnackBar(context, 'Saved to your products');
+      if (mounted) showAppSnackBar(context, 'Added to favourites');
     }
   }
 
-  Future<void> _addToList(Product product) async {
+  Future<void> _addToCart(Product product) async {
     final added = await addToShoppingList(ref, product.itemCode);
     if (!mounted) return;
     showAppSnackBar(
       context,
-      added ? 'Added to shopping list' : 'Please try again',
+      added ? 'Added to cart' : 'Please try again',
       isError: !added,
       actionLabel: added ? 'View' : null,
-      onAction: added ? () => context.push('/shopping-list') : null,
+      onAction: added ? () => context.push('/cart') : null,
     );
   }
 
@@ -270,6 +271,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Products'),
+        actions: const [CartAppBarAction()],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -363,7 +365,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       onOpenProduct: (p) => context.push('/product/${p.itemCode}'),
       onComparePrices: (p) => context.push('/compare/${p.itemCode}'),
       onToggleSave: _toggleSave,
-      onAdd: _addToList,
+      onAdd: _addToCart,
     );
   }
 }

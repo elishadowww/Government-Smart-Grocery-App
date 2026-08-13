@@ -8,9 +8,9 @@ import '../../../core/widgets/custom_snackbar.dart';
 import '../../authentication/repositories/auth_repositories.dart';
 
 /// Navigation drawer (spec Fig 7.1.2). Only screens that exist in this
-/// build (Dashboard, Search, Shopping List, Nearby, Saved Products) navigate
-/// for real; modules outside this branch's scope (Price Trends, Profile,
-/// Settings, About) show a placeholder instead of a dead route.
+/// build (Dashboard, Search, Cart, Nearby, Favourites) navigate for real;
+/// modules outside this branch's scope (Price Trends, Profile, Settings,
+/// About) show a placeholder instead of a dead route.
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
@@ -60,11 +60,11 @@ class AppDrawer extends ConsumerWidget {
                     },
                   ),
                   _DrawerItem(
-                    icon: Icons.list_alt,
-                    label: 'Shopping List',
+                    icon: Icons.shopping_cart_outlined,
+                    label: 'Cart',
                     onTap: () {
                       Navigator.of(context).pop();
-                      context.push('/shopping-list');
+                      context.push('/cart');
                     },
                   ),
                   _DrawerItem(
@@ -81,11 +81,11 @@ class AppDrawer extends ConsumerWidget {
                     onTap: () => _comingSoon(context),
                   ),
                   _DrawerItem(
-                    icon: Icons.bookmark_border,
-                    label: 'Saved Products',
+                    icon: Icons.favorite_border,
+                    label: 'Favourites',
                     onTap: () {
                       Navigator.of(context).pop();
-                      context.push('/saved');
+                      context.push('/favourites');
                     },
                   ),
                   _DrawerItem(

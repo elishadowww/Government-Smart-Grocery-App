@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_search_bar.dart';
+import '../../../core/widgets/cart_app_bar_action.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../providers/price_provider.dart';
@@ -12,9 +13,9 @@ import '../../../providers/recent_product_provider.dart';
 import '../widgets/app_drawer.dart';
 
 /// Dashboard (spec Fig 7.1.1): landing screen and navigation hub. Search,
-/// Nearby, Saved and Notifications are wired to real screens; Shopping List
-/// and Price Trends are out of this branch's scope and show a placeholder.
-/// The Budget Card and "Nearby Cheapest Supermarket" card are omitted since
+/// Nearby, Cart, Favourites and Notifications are wired to real screens;
+/// Price Trends is out of this branch's scope and shows a placeholder. The
+/// Budget Card and "Nearby Cheapest Supermarket" card are omitted since
 /// Module 8 (budget) isn't built and PriceCatcher stores have no
 /// coordinates to rank by proximity without a live location fix per item.
 class DashboardScreen extends ConsumerWidget {
@@ -36,6 +37,7 @@ class DashboardScreen extends ConsumerWidget {
             ),
             onPressed: () => context.push('/notifications'),
           ),
+          const CartAppBarAction(),
           IconButton(
             icon: const Icon(Icons.person_outline),
             onPressed: () => showAppSnackBar(context, 'Coming soon'),
@@ -75,9 +77,9 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _QuickAction(
-                  icon: Icons.list_alt,
-                  label: 'List',
-                  onTap: () => context.push('/shopping-list'),
+                  icon: Icons.shopping_cart_outlined,
+                  label: 'Cart',
+                  onTap: () => context.push('/cart'),
                 ),
               ),
               const SizedBox(width: 10),

@@ -5,10 +5,10 @@ import '../../../core/utils/category_icons.dart';
 import '../../../providers/shopping_provider.dart';
 import 'quantity_selector.dart';
 
-/// One row on the Shopping List screen: thumbnail, name, cheapest
-/// price/store, quantity stepper, subtotal, and a remove action.
-class ShoppingItemTile extends StatelessWidget {
-  const ShoppingItemTile({
+/// One row on the Cart screen: thumbnail, name, cheapest price/store,
+/// quantity stepper, subtotal, and a remove action.
+class CartItemTile extends StatelessWidget {
+  const CartItemTile({
     super.key,
     required this.entry,
     required this.onQuantityChanged,

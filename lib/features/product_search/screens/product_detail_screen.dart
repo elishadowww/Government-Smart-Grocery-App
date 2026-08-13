@@ -6,6 +6,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/utils/category_icons.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_loading.dart';
+import '../../../core/widgets/cart_app_bar_action.dart';
 import '../../../core/widgets/custom_dialog.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/widgets/inline_error.dart';
@@ -34,7 +35,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
-  bool _addingToList = false;
+  bool _addingToCart = false;
 
   @override
   void initState() {
@@ -55,24 +56,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final controller = ref.read(savedProductsControllerProvider);
     if (isSaved) {
       await controller.unsave(widget.itemCode);
-      if (mounted) showAppSnackBar(context, 'Removed from saved products');
+      if (mounted) showAppSnackBar(context, 'Removed from favourites');
     } else {
       await controller.save(widget.itemCode);
-      if (mounted) showAppSnackBar(context, 'Saved to your products');
+      if (mounted) showAppSnackBar(context, 'Added to favourites');
     }
   }
 
-  Future<void> _addToList() async {
-    setState(() => _addingToList = true);
+  Future<void> _addToCart() async {
+    setState(() => _addingToCart = true);
     final added = await addToShoppingList(ref, widget.itemCode);
     if (!mounted) return;
-    setState(() => _addingToList = false);
+    setState(() => _addingToCart = false);
     showAppSnackBar(
       context,
-      added ? 'Added to shopping list' : 'Please try again',
+      added ? 'Added to cart' : 'Please try again',
       isError: !added,
       actionLabel: added ? 'View' : null,
-      onAction: added ? () => context.push('/shopping-list') : null,
+      onAction: added ? () => context.push('/cart') : null,
     );
   }
 
@@ -92,6 +93,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ),
             onPressed: _toggleSave,
           ),
+          const CartAppBarAction(),
         ],
       ),
       body: productAsync.when(
@@ -115,27 +117,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Row(
-          children: [
-            Expanded(
-              child: AppButton(
-                label: 'Add to List',
-                type: AppButtonType.outlined,
-                icon: Icons.playlist_add,
-                loading: _addingToList,
-                onPressed: _addToList,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AppButton(
-                label: 'Add to Cart',
-                icon: Icons.shopping_cart_outlined,
-                loading: _addingToList,
-                onPressed: _addToList,
-              ),
-            ),
-          ],
+        child: AppButton(
+          label: 'Add to Cart',
+          icon: Icons.shopping_cart_outlined,
+          loading: _addingToCart,
+          onPressed: _addToCart,
         ),
       ),
     );

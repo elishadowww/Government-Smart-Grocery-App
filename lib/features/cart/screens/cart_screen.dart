@@ -9,15 +9,15 @@ import '../../../core/widgets/custom_dialog.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/widgets/inline_error.dart';
 import '../../../providers/shopping_provider.dart';
-import '../widgets/shopping_item_tile.dart';
+import '../widgets/cart_item_tile.dart';
 
-/// Shopping List / Cart screen (spec §7.5, simplified: no mixed-store
-/// recommendation or "Complete Shopping" archive flow — that's the rest of
-/// Module 3, out of scope here). Reachable from the Dashboard's "List"
-/// quick action, the nav drawer, and a "View" action on the
-/// "Added to shopping list" snackbar.
-class ShoppingListScreen extends ConsumerWidget {
-  const ShoppingListScreen({super.key});
+/// Cart screen (spec §7.5, simplified: no mixed-store recommendation or
+/// "Complete Shopping" archive flow — that's the rest of Module 3, out of
+/// scope here). Reachable from the persistent cart icon in the app bar, the
+/// Dashboard's "Cart" quick action, the nav drawer, and a "View" action on
+/// the "Added to cart" snackbar.
+class CartScreen extends ConsumerWidget {
+  const CartScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,7 +26,7 @@ class ShoppingListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shopping List'),
+        title: const Text('Cart'),
         actions: [
           if ((entriesAsync.value ?? const []).isNotEmpty)
             IconButton(
@@ -34,8 +34,8 @@ class ShoppingListScreen extends ConsumerWidget {
               onPressed: () async {
                 final confirmed = await showConfirmDialog(
                   context,
-                  title: 'Clear Shopping List',
-                  message: 'This will remove every item from your shopping list.',
+                  title: 'Clear Cart',
+                  message: 'This will remove every item from your cart.',
                 );
                 if (confirmed == true) {
                   await ref.read(shoppingListControllerProvider).clearAll();
@@ -49,7 +49,7 @@ class ShoppingListScreen extends ConsumerWidget {
           if (entries.isEmpty) {
             return AppEmptyState(
               icon: Icons.shopping_cart_outlined,
-              message: 'Your shopping list is empty.\nAdd products while browsing or comparing prices.',
+              message: 'Your cart is empty.\nAdd products while browsing or comparing prices.',
               actionLabel: 'Search Products',
               onAction: () => context.push('/search'),
             );
@@ -64,7 +64,7 @@ class ShoppingListScreen extends ConsumerWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final entry = entries[index];
-                    return ShoppingItemTile(
+                    return CartItemTile(
                       entry: entry,
                       onOpen: () => context.push('/product/${entry.product.itemCode}'),
                       onQuantityChanged: (qty) => ref
@@ -75,7 +75,7 @@ class ShoppingListScreen extends ConsumerWidget {
                             .read(shoppingListControllerProvider)
                             .remove(entry.product.itemCode);
                         if (context.mounted) {
-                          showAppSnackBar(context, 'Removed from shopping list');
+                          showAppSnackBar(context, 'Removed from cart');
                         }
                       },
                     );
@@ -88,7 +88,7 @@ class ShoppingListScreen extends ConsumerWidget {
         },
         loading: () => const SkeletonListLoader(),
         error: (e, _) => InlineError(
-          message: 'Could not load your shopping list.',
+          message: 'Could not load your cart.',
           onRetry: () => ref.invalidate(shoppingListEntriesProvider),
         ),
       ),

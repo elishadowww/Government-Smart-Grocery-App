@@ -81,6 +81,13 @@ final shoppingListTotalProvider = Provider<double>((ref) {
   return entries.fold<double>(0, (sum, e) => sum + (e.subtotal ?? 0));
 });
 
+/// Total units across the cart (sum of quantities, not distinct products) —
+/// backs the cart badge shown in the app bar on every screen.
+final cartItemCountProvider = Provider<int>((ref) {
+  final entries = ref.watch(shoppingListEntriesProvider).value ?? const [];
+  return entries.fold<int>(0, (sum, e) => sum + e.quantity);
+});
+
 class ShoppingListController {
   ShoppingListController(this._ref);
 

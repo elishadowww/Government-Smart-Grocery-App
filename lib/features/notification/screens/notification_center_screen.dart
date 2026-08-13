@@ -5,6 +5,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_skeleton.dart';
+import '../../../core/widgets/cart_app_bar_action.dart';
 import '../../../core/widgets/custom_dialog.dart';
 import '../../../core/widgets/inline_error.dart';
 import '../../../models/notification_model.dart';
@@ -36,6 +37,7 @@ class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScr
       appBar: AppBar(
         title: const Text('Notifications'),
         actions: [
+          const CartAppBarAction(),
           TextButton(
             onPressed: () => ref.read(notificationsControllerProvider).markAllRead(),
             child: const Text('Mark All'),
@@ -47,7 +49,7 @@ class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScr
           if (notifications.isEmpty) {
             return const AppEmptyState(
               icon: Icons.notifications_none,
-              message: 'No notifications yet — save products to get price alerts.',
+              message: 'No notifications yet — favourite products to get price alerts.',
             );
           }
           return Column(

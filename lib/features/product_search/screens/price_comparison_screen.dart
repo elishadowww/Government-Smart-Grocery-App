@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_skeleton.dart';
+import '../../../core/widgets/cart_app_bar_action.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/widgets/inline_error.dart';
 import '../../../models/price.dart';
@@ -18,7 +20,7 @@ import '../widgets/comparison_card.dart';
 enum _ComparisonSort { price, distance, alphabetical }
 
 /// Price comparison screen (spec Fig 7.3.3): Lowest/Average/Highest stats,
-/// sortable store list with real distance, Add to List.
+/// sortable store list with real distance, Add to Cart.
 class PriceComparisonScreen extends ConsumerStatefulWidget {
   const PriceComparisonScreen({super.key, required this.itemCode});
 
@@ -32,15 +34,17 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
   _ComparisonSort _sortBy = _ComparisonSort.price;
   bool _adding = false;
 
-  Future<void> _addToList() async {
+  Future<void> _addToCart() async {
     setState(() => _adding = true);
     final added = await addToShoppingList(ref, widget.itemCode);
     if (!mounted) return;
     setState(() => _adding = false);
     showAppSnackBar(
       context,
-      added ? 'Added to shopping list' : 'Please try again',
+      added ? 'Added to cart' : 'Please try again',
       isError: !added,
+      actionLabel: added ? 'View' : null,
+      onAction: added ? () => context.push('/cart') : null,
     );
   }
 
@@ -55,7 +59,7 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
         : 'Compare Prices';
 
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(title: Text(title), actions: const [CartAppBarAction()]),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: _buildBody(pricesAsync, storesAsync),
@@ -164,10 +168,10 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
         ),
         const SizedBox(height: 12),
         AppButton(
-          label: 'Add to List',
-          icon: Icons.playlist_add,
+          label: 'Add to Cart',
+          icon: Icons.shopping_cart_outlined,
           loading: _adding,
-          onPressed: _addToList,
+          onPressed: _addToCart,
         ),
       ],
     );

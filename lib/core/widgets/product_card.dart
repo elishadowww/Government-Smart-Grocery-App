@@ -126,7 +126,7 @@ class ProductCard extends StatelessWidget {
                             label: 'Add',
                             type: AppButtonType.filled,
                             dense: true,
-                            icon: Icons.add,
+                            icon: Icons.add_shopping_cart,
                             onPressed: onAdd,
                           ),
                         ),

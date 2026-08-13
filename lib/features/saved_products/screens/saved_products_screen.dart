@@ -7,6 +7,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_search_bar.dart';
 import '../../../core/widgets/app_skeleton.dart';
+import '../../../core/widgets/cart_app_bar_action.dart';
 import '../../../core/widgets/custom_dialog.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/widgets/inline_error.dart';
@@ -18,10 +19,11 @@ import '../../../providers/shopping_provider.dart';
 import '../../../providers/supermarket_provider.dart';
 import '../widgets/saved_product_tile.dart';
 
-/// Saved Products screen (saved_product_screen.png): banner, search-within-
-/// saved, All Saved count + Edit, saved product rows. Guests are prompted to
-/// log in rather than shown an empty list (spec §4: saving is registered-
-/// only).
+/// Favourites screen (saved_product_screen.png): banner, search-within-
+/// favourites, count + Edit, favourited product rows. Guests are prompted
+/// to log in rather than shown an empty list (spec §4: saving is
+/// registered-only). Backed by the same saved-product data layer as before
+/// ("Favourites" is a UI rebrand, not a new store).
 class SavedProductsScreen extends ConsumerStatefulWidget {
   const SavedProductsScreen({super.key});
 
@@ -42,18 +44,18 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
 
   Future<void> _unsave(Product product) async {
     await ref.read(savedProductsControllerProvider).unsave(product.itemCode);
-    if (mounted) showAppSnackBar(context, 'Removed from saved products');
+    if (mounted) showAppSnackBar(context, 'Removed from favourites');
   }
 
-  Future<void> _addToList(Product product) async {
+  Future<void> _addToCart(Product product) async {
     final added = await addToShoppingList(ref, product.itemCode);
     if (!mounted) return;
     showAppSnackBar(
       context,
-      added ? 'Added to shopping list' : 'Please try again',
+      added ? 'Added to cart' : 'Please try again',
       isError: !added,
       actionLabel: added ? 'View' : null,
-      onAction: added ? () => context.push('/shopping-list') : null,
+      onAction: added ? () => context.push('/cart') : null,
     );
   }
 
@@ -63,16 +65,17 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Saved Products'),
+        title: const Text('Favourites'),
         actions: [
+          const CartAppBarAction(),
           if (isRegistered)
             IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () async {
                 final confirmed = await showConfirmDialog(
                   context,
-                  title: 'Clear All Saved Products',
-                  message: 'This will remove every saved product. This cannot be undone.',
+                  title: 'Clear All Favourites',
+                  message: 'This will remove every favourited product. This cannot be undone.',
                 );
                 if (confirmed == true) {
                   final saved = await ref.read(savedProductsProvider.future);
@@ -96,15 +99,15 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.bookmark_border, size: 56, color: AppColors.grey),
+            const Icon(Icons.favorite_border, size: 56, color: AppColors.grey),
             const SizedBox(height: 16),
             const Text(
-              'Log in to save products',
+              'Log in to save favourites',
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Save products you love and get notified when their price changes.',
+              'Favourite products you love and get notified when their price changes.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.grey),
             ),
@@ -144,14 +147,14 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
                     color: AppColors.primary.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.bookmark, color: AppColors.primary),
+                  child: const Icon(Icons.favorite, color: AppColors.primary),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Your Saved Items', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Your Favourites', style: TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(height: 2),
                       Text(
                         'Quick access to products you save for later.',
@@ -167,7 +170,7 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
           const SizedBox(height: 16),
           AppSearchBar(
             controller: _searchController,
-            hintText: 'Search saved products...',
+            hintText: 'Search favourites...',
             onChanged: (value) => setState(() => _query = value.trim().toLowerCase()),
           ),
           const SizedBox(height: 16),
@@ -187,7 +190,7 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('All Saved (${products.length})',
+                          Text('All Favourites (${products.length})',
                               style: const TextStyle(fontWeight: FontWeight.w600)),
                           GestureDetector(
                             onTap: () => setState(() => _editing = !_editing),
@@ -205,16 +208,16 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
                     Expanded(
                       child: filtered.isEmpty
                           ? AppEmptyState(
-                              icon: Icons.bookmark_border,
+                              icon: Icons.favorite_border,
                               message: products.isEmpty
-                                  ? 'You haven\'t saved any products yet.'
-                                  : 'No saved products match your search.',
+                                  ? 'You haven\'t added any favourites yet.'
+                                  : 'No favourites match your search.',
                             )
                           : _SavedProductListView(
                               products: filtered,
                               editing: _editing,
                               onUnsave: _unsave,
-                              onAddToList: _addToList,
+                              onAddToCart: _addToCart,
                             ),
                     ),
                   ],
@@ -222,7 +225,7 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
               },
               loading: () => const SkeletonListLoader(),
               error: (e, _) => InlineError(
-                message: 'Could not load your saved products.',
+                message: 'Could not load your favourites.',
                 onRetry: () => ref.invalidate(savedProductsProvider),
               ),
             ),
@@ -238,13 +241,13 @@ class _SavedProductListView extends ConsumerWidget {
     required this.products,
     required this.editing,
     required this.onUnsave,
-    required this.onAddToList,
+    required this.onAddToCart,
   });
 
   final List<Product> products;
   final bool editing;
   final ValueChanged<Product> onUnsave;
-  final ValueChanged<Product> onAddToList;
+  final ValueChanged<Product> onAddToCart;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -278,7 +281,7 @@ class _SavedProductListView extends ConsumerWidget {
                 storeName: price == null ? null : storeByCode[price.premiseCode],
                 onOpen: () => context.push('/product/${product.itemCode}'),
                 onUnsave: () => onUnsave(product),
-                onAddToList: () => onAddToList(product),
+                onAddToCart: () => onAddToCart(product),
               );
       },
     );

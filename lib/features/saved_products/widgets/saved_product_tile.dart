@@ -14,7 +14,7 @@ class SavedProductTile extends StatelessWidget {
     this.storeName,
     required this.onOpen,
     required this.onUnsave,
-    required this.onAddToList,
+    required this.onAddToCart,
   });
 
   final Product product;
@@ -22,7 +22,7 @@ class SavedProductTile extends StatelessWidget {
   final String? storeName;
   final VoidCallback onOpen;
   final VoidCallback onUnsave;
-  final VoidCallback onAddToList;
+  final VoidCallback onAddToCart;
 
   @override
   Widget build(BuildContext context) {
@@ -110,12 +110,12 @@ class SavedProductTile extends StatelessWidget {
                     icon: const Icon(Icons.more_vert, color: AppColors.grey, size: 20),
                     onSelected: (value) {
                       if (value == 'remove') onUnsave();
-                      if (value == 'add') onAddToList();
+                      if (value == 'add') onAddToCart();
                       if (value == 'open') onOpen();
                     },
                     itemBuilder: (context) => const [
                       PopupMenuItem(value: 'open', child: Text('View Details')),
-                      PopupMenuItem(value: 'add', child: Text('Add to List')),
+                      PopupMenuItem(value: 'add', child: Text('Add to Cart')),
                       PopupMenuItem(value: 'remove', child: Text('Remove')),
                     ],
                   ),
