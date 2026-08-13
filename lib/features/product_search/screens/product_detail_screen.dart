@@ -17,6 +17,7 @@ import '../../../providers/product_provider.dart';
 import '../../../providers/recent_product_provider.dart';
 import '../../../providers/saved_product_provider.dart';
 import '../../../providers/shopping_provider.dart';
+import '../../cart/widgets/store_picker_sheet.dart';
 import '../widgets/comparison_card.dart';
 
 enum _PriceTrend { rising, falling, stable }
@@ -64,8 +65,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   Future<void> _addToCart() async {
+    final productName = ref.read(productByIdProvider(widget.itemCode)).value?.name ?? '';
+    final selected = await showStorePickerSheet(
+      context,
+      itemCode: widget.itemCode,
+      productName: productName,
+    );
+    if (selected == null || !mounted) return;
+
     setState(() => _addingToCart = true);
-    final added = await addToShoppingList(ref, widget.itemCode);
+    final added = await addToShoppingListAt(ref, widget.itemCode, selected.premiseCode);
     if (!mounted) return;
     setState(() => _addingToCart = false);
     showAppSnackBar(

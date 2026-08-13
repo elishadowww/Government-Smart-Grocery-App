@@ -60,4 +60,9 @@ class ShoppingListItemColumns {
   static const String uid = 'uid';
   static const String itemCode = 'item_code';
   static const String quantity = 'quantity';
+
+  /// The supermarket the user chose to buy this item from — nullable so
+  /// rows written before this column existed (pre-migration) still read
+  /// back fine; callers fall back to the cheapest store for those.
+  static const String premiseCode = 'premise_code';
 }

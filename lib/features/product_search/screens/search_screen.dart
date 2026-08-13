@@ -23,6 +23,7 @@ import '../../../providers/saved_product_provider.dart';
 import '../../../providers/shopping_provider.dart';
 import '../../../providers/store_distance_provider.dart';
 import '../../../providers/supermarket_provider.dart';
+import '../../cart/widgets/store_picker_sheet.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/product_list.dart';
 import '../widgets/search_suggestion.dart';
@@ -251,7 +252,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Future<void> _addToCart(Product product) async {
-    final added = await addToShoppingList(ref, product.itemCode);
+    final selected = await showStorePickerSheet(
+      context,
+      itemCode: product.itemCode,
+      productName: product.name,
+    );
+    if (selected == null || !mounted) return;
+
+    final added = await addToShoppingListAt(ref, product.itemCode, selected.premiseCode);
     if (!mounted) return;
     showAppSnackBar(
       context,

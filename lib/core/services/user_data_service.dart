@@ -24,7 +24,7 @@ class UserDataService {
     final path = p.join(await getDatabasesPath(), _fileName);
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE ${UserDataTables.savedProducts} (
@@ -70,9 +70,23 @@ class UserDataService {
             ${ShoppingListItemColumns.uid} TEXT NOT NULL,
             ${ShoppingListItemColumns.itemCode} TEXT NOT NULL,
             ${ShoppingListItemColumns.quantity} INTEGER NOT NULL,
+            ${ShoppingListItemColumns.premiseCode} TEXT,
             PRIMARY KEY (${ShoppingListItemColumns.uid}, ${ShoppingListItemColumns.itemCode})
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // Cart items gained a "which store did you pick" column so Add
+          // to Cart can remember a specific store instead of always
+          // implying the cheapest one. Existing rows just read back with
+          // premise_code = NULL, which callers treat as "fall back to
+          // cheapest" — no data loss.
+          await db.execute('''
+            ALTER TABLE ${UserDataTables.shoppingListItems}
+            ADD COLUMN ${ShoppingListItemColumns.premiseCode} TEXT
+          ''');
+        }
       },
     );
   }

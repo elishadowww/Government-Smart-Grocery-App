@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
-import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_skeleton.dart';
 import '../../../core/widgets/cart_app_bar_action.dart';
@@ -20,7 +19,10 @@ import '../widgets/comparison_card.dart';
 enum _ComparisonSort { price, distance, alphabetical }
 
 /// Price comparison screen (spec Fig 7.3.3): Lowest/Average/Highest stats,
-/// sortable store list with real distance, Add to Cart.
+/// sortable store list with real distance. Tapping a store adds this
+/// product to the cart at that specific store — the full store list is
+/// already on screen, so there's no need for a second store-picker sheet
+/// like the quicker "Add to Cart" entry points elsewhere use.
 class PriceComparisonScreen extends ConsumerStatefulWidget {
   const PriceComparisonScreen({super.key, required this.itemCode});
 
@@ -32,13 +34,10 @@ class PriceComparisonScreen extends ConsumerStatefulWidget {
 
 class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
   _ComparisonSort _sortBy = _ComparisonSort.price;
-  bool _adding = false;
 
-  Future<void> _addToCart() async {
-    setState(() => _adding = true);
-    final added = await addToShoppingList(ref, widget.itemCode);
+  Future<void> _addToCartAt(String premiseCode) async {
+    final added = await addToShoppingListAt(ref, widget.itemCode, premiseCode);
     if (!mounted) return;
-    setState(() => _adding = false);
     showAppSnackBar(
       context,
       added ? 'Added to cart' : 'Please try again',
@@ -134,6 +133,8 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
               ],
               onChanged: (value) => setState(() => _sortBy = value ?? _ComparisonSort.price),
             ),
+            const Spacer(),
+            const Text('Tap a store to add', style: TextStyle(color: AppColors.grey, fontSize: 12)),
           ],
         ),
         const SizedBox(height: 12),
@@ -143,6 +144,7 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
                   prices: sorted,
                   storeByCode: storeByCode,
                   cheapestPremiseCode: cheapestPremiseCode,
+                  onAdd: _addToCartAt,
                 )
               : ListView.separated(
                   itemCount: sorted.length,
@@ -160,18 +162,12 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
                           isCheapest: price.premiseCode == cheapestPremiseCode,
                           distanceKm: distanceAsync.value,
                           distanceLoading: distanceAsync.isLoading,
+                          onTap: () => _addToCartAt(store.premiseCode),
                         );
                       },
                     );
                   },
                 ),
-        ),
-        const SizedBox(height: 12),
-        AppButton(
-          label: 'Add to Cart',
-          icon: Icons.shopping_cart_outlined,
-          loading: _adding,
-          onPressed: _addToCart,
         ),
       ],
     );
@@ -234,11 +230,13 @@ class _DistanceSortedList extends ConsumerWidget {
     required this.prices,
     required this.storeByCode,
     required this.cheapestPremiseCode,
+    required this.onAdd,
   });
 
   final List<Price> prices;
   final Map<String, Supermarket> storeByCode;
   final String cheapestPremiseCode;
+  final ValueChanged<String> onAdd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -276,6 +274,7 @@ class _DistanceSortedList extends ConsumerWidget {
           price: entry.price.price,
           isCheapest: entry.price.premiseCode == cheapestPremiseCode,
           distanceKm: distanceResults[index].value,
+          onTap: () => onAdd(entry.store!.premiseCode),
         );
       },
     );

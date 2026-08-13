@@ -5,8 +5,10 @@ import '../../../core/utils/category_icons.dart';
 import '../../../providers/shopping_provider.dart';
 import 'quantity_selector.dart';
 
-/// One row on the Cart screen: thumbnail, name, cheapest price/store,
-/// quantity stepper, subtotal, and a remove action.
+/// One row on the Cart screen: thumbnail, name, price at the chosen store,
+/// quantity stepper, and a remove action. The store itself is shown once
+/// per group via the section header, not repeated per row — swipe the row
+/// (endToStart) to remove it as an alternative to the Remove label.
 class CartItemTile extends StatelessWidget {
   const CartItemTile({
     super.key,
@@ -65,8 +67,7 @@ class CartItemTile extends StatelessWidget {
                     Text(
                       entry.price == null
                           ? 'Price unavailable'
-                          : 'RM${entry.price!.price.toStringAsFixed(2)}'
-                              '${entry.storeName != null ? ' (${entry.storeName})' : ''}',
+                          : 'RM${entry.price!.price.toStringAsFixed(2)} each',
                       style: const TextStyle(fontSize: 12, color: AppColors.grey),
                     ),
                   ],
