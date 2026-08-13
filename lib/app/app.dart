@@ -21,7 +21,15 @@ class SmartGroceryApp extends ConsumerWidget {
         final dbInit = ref.watch(databaseInitProvider);
         return dbInit.when(
           data: (_) => child ?? const SizedBox.shrink(),
-          loading: () => const AppLoading(message: 'Preparing local database...'),
+          loading: () {
+            final progress = ref.watch(databaseCopyProgressProvider).value;
+            final message = progress == null
+                ? 'Preparing local database...'
+                : 'Preparing local database — first launch only\n'
+                    '${(progress * 100).toStringAsFixed(0)}%\n\n'
+                    'This can take a few minutes the first time.';
+            return AppLoading(message: message);
+          },
           error: (error, _) => AppError(
             message: error is DatabaseNotAvailableException
                 ? error.message

@@ -16,3 +16,10 @@ final databaseInitProvider = FutureProvider<void>((ref) async {
   final service = ref.watch(databaseServiceProvider);
   await service.database;
 });
+
+/// First-launch copy progress in [0.0, 1.0] — lets the loading screen show
+/// real progress instead of a bare spinner while [databaseInitProvider] is
+/// pending. Never emits once the database is already in place.
+final databaseCopyProgressProvider = StreamProvider<double>((ref) {
+  return ref.watch(databaseServiceProvider).copyProgress;
+});

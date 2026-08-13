@@ -66,6 +66,8 @@ windows/flutter/ephemeral/
 *.log
 firebase-debug.log
 *.zip
+*.pdf
+assets/temp
 
 .env
 
@@ -76,9 +78,11 @@ firebase-debug.log
 data/
 tools/db_builder/.venv/
 
-# The built database is too large for git and is distributed separately
-# (see tools/db_builder/README.md) — keep the folder (.gitkeep) but not the
-# .db file itself.
+# The whole (unsplit) built database exceeds GitHub's 100MB file limit, so
+# it's never committed directly — only the pre-split assets/database/*.part*
+# files are (each kept under 100MB; see DatabaseService for how they're
+# reassembled on-device). If you regenerate pricecatcher.db, re-split it
+# before committing rather than dropping the raw file in this folder.
 assets/database/*.db
 
 # Leftover from the retired Firestore importer — no longer used, but kept

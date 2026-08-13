@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/price.dart';
+import '../models/supermarket.dart';
 import '../repositories/price_repository.dart';
+import 'supermarket_provider.dart';
 
 final priceRepositoryProvider = Provider<PriceRepository>((ref) {
   return PriceRepository();
@@ -40,4 +42,23 @@ final priceHistoryProvider =
         itemCode: query.itemCode,
         premiseCode: query.premiseCode,
       );
+});
+
+/// Cheapest current price per item, for a batch of items — backs the
+/// Search Products result cards (spec §7.3 Product Card: "Cheapest: RMx.xx
+/// (Store)").
+final cheapestPricesProvider =
+    FutureProvider.family<Map<String, Price>, List<String>>((ref, itemCodes) {
+  return ref.watch(priceRepositoryProvider).getCheapestPrices(itemCodes);
+});
+
+/// Every supermarket carrying [itemCode] that has a current price — one row
+/// per [latestPricesForItemProvider] entry. Backs the price comparison
+/// screen and the product detail screen's mini comparison list, so both can
+/// share Riverpod's caching instead of re-querying on every rebuild.
+final priceComparisonStoresProvider =
+    FutureProvider.family<List<Supermarket>, String>((ref, itemCode) async {
+  final prices = await ref.watch(latestPricesForItemProvider(itemCode).future);
+  final premiseCodes = prices.map((p) => p.premiseCode).toList();
+  return ref.watch(supermarketRepositoryProvider).getByIds(premiseCodes);
 });

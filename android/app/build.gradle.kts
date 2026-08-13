@@ -27,6 +27,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // The bundled pricecatcher.db asset is large and doesn't compress well
+    // (it's already dense binary data). Without this, AGP gzips it into the
+    // APK by default, and rootBundle.load() has to inflate the whole thing
+    // on every first-launch copy — dramatically slower than a raw read, and
+    // the likely cause of the copy looking "stuck" on-device.
+    androidResources {
+        noCompress += "db"
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.government_smart_grocery_app"
