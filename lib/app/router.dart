@@ -11,6 +11,7 @@ import '../../features/authentication/screens/splash_screen.dart';
 import '../../features/authentication/screens/terms_of_service_screen.dart';
 import '../../features/authentication/screens/verify_email_screen.dart';
 import '../../features/authentication/services/auth_state_notifier.dart';
+import '../../features/budget/screens/budget_screen.dart';
 import '../../features/cart/screens/cart_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/nearby_supermarket/screens/map_screen.dart';
@@ -141,6 +142,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: "/cart",
       builder: (_, __) => const CartScreen(),
+    ),
+
+    GoRoute(
+      path: "/budget",
+      builder: (_, __) => const BudgetScreen(),
     ),
   ],
 );

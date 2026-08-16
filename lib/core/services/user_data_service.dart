@@ -24,7 +24,7 @@ class UserDataService {
     final path = p.join(await getDatabasesPath(), _fileName);
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE ${UserDataTables.savedProducts} (
@@ -74,6 +74,14 @@ class UserDataService {
             PRIMARY KEY (${ShoppingListItemColumns.uid}, ${ShoppingListItemColumns.itemCode})
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE ${UserDataTables.budgets} (
+            ${BudgetColumns.uid} TEXT PRIMARY KEY,
+            ${BudgetColumns.amount} REAL NOT NULL,
+            ${BudgetColumns.updatedAt} TEXT NOT NULL
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -85,6 +93,16 @@ class UserDataService {
           await db.execute('''
             ALTER TABLE ${UserDataTables.shoppingListItems}
             ADD COLUMN ${ShoppingListItemColumns.premiseCode} TEXT
+          ''');
+        }
+        if (oldVersion < 3) {
+          // Module 8 (Budget Shopping List) — one budget row per user.
+          await db.execute('''
+            CREATE TABLE ${UserDataTables.budgets} (
+              ${BudgetColumns.uid} TEXT PRIMARY KEY,
+              ${BudgetColumns.amount} REAL NOT NULL,
+              ${BudgetColumns.updatedAt} TEXT NOT NULL
+            )
           ''');
         }
       },

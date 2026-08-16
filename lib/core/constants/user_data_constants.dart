@@ -13,6 +13,7 @@ class UserDataTables {
   static const String recentProducts = 'recent_products';
   static const String notifications = 'notifications';
   static const String shoppingListItems = 'shopping_list_items';
+  static const String budgets = 'budgets';
 }
 
 class SavedProductColumns {
@@ -65,4 +66,12 @@ class ShoppingListItemColumns {
   /// rows written before this column existed (pre-migration) still read
   /// back fine; callers fall back to the cheapest store for those.
   static const String premiseCode = 'premise_code';
+}
+
+class BudgetColumns {
+  BudgetColumns._();
+
+  static const String uid = 'uid';
+  static const String amount = 'amount';
+  static const String updatedAt = 'updated_at';
 }

@@ -81,6 +81,14 @@ class AppDrawer extends ConsumerWidget {
                     onTap: () => _comingSoon(context),
                   ),
                   _DrawerItem(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: 'My Budget',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push('/budget');
+                    },
+                  ),
+                  _DrawerItem(
                     icon: Icons.favorite_border,
                     label: 'Favourites',
                     onTap: () {

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_search_bar.dart';
+import '../../../core/widgets/budget_card.dart';
 import '../../../core/widgets/cart_app_bar_action.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/notification_provider.dart';
@@ -13,11 +14,11 @@ import '../../../providers/recent_product_provider.dart';
 import '../widgets/app_drawer.dart';
 
 /// Dashboard (spec Fig 7.1.1): landing screen and navigation hub. Search,
-/// Nearby, Cart, Favourites and Notifications are wired to real screens;
-/// Price Trends is out of this branch's scope and shows a placeholder. The
-/// Budget Card and "Nearby Cheapest Supermarket" card are omitted since
-/// Module 8 (budget) isn't built and PriceCatcher stores have no
-/// coordinates to rank by proximity without a live location fix per item.
+/// Nearby, Cart, Favourites, Notifications and Budget are wired to real
+/// screens; Price Trends is out of this branch's scope and shows a
+/// placeholder. The "Nearby Cheapest Supermarket" card is omitted since
+/// PriceCatcher stores have no coordinates to rank by proximity without a
+/// live location fix per item.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -92,6 +93,8 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          const BudgetCard(),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
