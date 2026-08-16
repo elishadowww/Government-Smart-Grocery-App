@@ -12,10 +12,10 @@ class LocationErrorCard extends StatelessWidget {
   });
 
   bool get _isGpsDisabled =>
-      message.toLowerCase().contains("location services");
+      message.toLowerCase().contains("location services are disabled");
 
   bool get _isPermissionDenied =>
-      message.toLowerCase().contains("permission");
+      message.toLowerCase().contains("location permission");
 
   @override
   Widget build(BuildContext context) {
@@ -33,17 +33,21 @@ class LocationErrorCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
 
-                const Icon(
-                  Icons.location_off_rounded,
+                Icon(
+                  _isGpsDisabled || _isPermissionDenied
+                      ? Icons.location_off_rounded
+                      : Icons.error_outline_rounded,
                   size: 70,
                   color: Colors.redAccent,
                 ),
 
                 const SizedBox(height: 18),
 
-                const Text(
-                  "Location Required",
-                  style: TextStyle(
+                Text(
+                  _isGpsDisabled || _isPermissionDenied
+                      ? "Location Required"
+                      : "Couldn't Load Supermarkets",
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -54,7 +58,9 @@ class LocationErrorCard extends StatelessWidget {
                 Text(
                   _isGpsDisabled
                       ? "Please turn on your device's location service to discover nearby supermarkets."
-                      : "Please allow location permission to discover nearby supermarkets.",
+                      : _isPermissionDenied
+                          ? "Please allow location permission to discover nearby supermarkets."
+                          : message,
                   textAlign: TextAlign.center,
                 ),
 
@@ -63,11 +69,17 @@ class LocationErrorCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    icon: const Icon(Icons.location_on),
+                    icon: Icon(
+                      _isGpsDisabled || _isPermissionDenied
+                          ? Icons.location_on
+                          : Icons.refresh,
+                    ),
                     label: Text(
                       _isGpsDisabled
                           ? "Turn On Location"
-                          : "Grant Permission",
+                          : _isPermissionDenied
+                              ? "Grant Permission"
+                              : "Retry",
                     ),
                     onPressed: () async {
                       if (_isGpsDisabled) {
