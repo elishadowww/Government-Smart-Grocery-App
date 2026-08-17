@@ -61,4 +61,20 @@ class SupermarketRepository {
     final rows = await db.query(DatabaseTables.supermarkets, limit: limit);
     return rows.map(Supermarket.fromMap).toList();
   }
+
+  /// Substring search over the premise name. Used by [SupermarketMatcher]
+  /// to find PriceCatcher candidates for a Google Places result, since the
+  /// two data sources don't share an ID.
+  Future<List<Supermarket>> searchByName(String query, {int limit = 50}) async {
+    final term = query.trim();
+    if (term.isEmpty) return const [];
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      DatabaseTables.supermarkets,
+      where: '${SupermarketColumns.name} LIKE ?',
+      whereArgs: ['%$term%'],
+      limit: limit,
+    );
+    return rows.map(Supermarket.fromMap).toList();
+  }
 }
