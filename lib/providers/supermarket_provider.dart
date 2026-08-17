@@ -1,10 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/nearby_supermarket/models/supermarket_model.dart';
+import '../features/nearby_supermarket/services/supermarket_matcher.dart';
 import '../models/supermarket.dart';
 import '../repositories/supermarket_repository.dart';
 
 final supermarketRepositoryProvider = Provider<SupermarketRepository>((ref) {
   return SupermarketRepository();
+});
+
+final supermarketMatcherProvider = Provider<SupermarketMatcher>((ref) {
+  return SupermarketMatcher(repository: ref.watch(supermarketRepositoryProvider));
+});
+
+/// Best-effort match from a Nearby Supermarket module place (Google Places)
+/// to its PriceCatcher premise, if any — see [SupermarketMatcher].
+final matchedPremiseForPlaceProvider =
+    FutureProvider.family<SupermarketMatch?, SupermarketModel>((ref, place) {
+  return ref.watch(supermarketMatcherProvider).match(place);
 });
 
 final supermarketByIdProvider =

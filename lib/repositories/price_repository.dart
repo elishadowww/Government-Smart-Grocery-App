@@ -28,6 +28,22 @@ class PriceRepository {
     return rows.map(Price.fromMap).toList();
   }
 
+  /// Current price for every product stocked at [premiseCode] — backs the
+  /// Nearby Supermarket detail screen's product catalogue.
+  Future<List<Price>> getLatestPricesForPremise(
+    String premiseCode, {
+    int limit = 200,
+  }) async {
+    final db = await _databaseService.database;
+    final rows = await db.query(
+      DatabaseTables.latestPrices,
+      where: '${PriceColumns.premiseCode} = ?',
+      whereArgs: [premiseCode],
+      limit: limit,
+    );
+    return rows.map(Price.fromMap).toList();
+  }
+
   /// Current price for [itemCode] at a single [premiseCode], if any.
   Future<Price?> getLatestPrice(String itemCode, String premiseCode) async {
     final db = await _databaseService.database;

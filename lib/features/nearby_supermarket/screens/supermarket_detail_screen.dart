@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../providers/price_provider.dart';
+import '../../../providers/supermarket_provider.dart';
 import '../models/supermarket_model.dart';
 
-class SupermarketDetailScreen extends StatelessWidget {
+/// Products & prices shown here are matched from this Places result to a
+/// PriceCatcher premise by [SupermarketMatcher] — the two data sources
+/// don't share an ID, so on a low-confidence match the UI says so instead
+/// of presenting it as exact.
+const _maxCatalogItems = 20;
+const _maxSavingsItems = 5;
+
+class SupermarketDetailScreen extends ConsumerWidget {
   final SupermarketModel supermarket;
 
   const SupermarketDetailScreen({
@@ -10,7 +22,9 @@ class SupermarketDetailScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final matchAsync = ref.watch(matchedPremiseForPlaceProvider(supermarket));
+
     return Scaffold(
       appBar: AppBar(
         title: Text(supermarket.name),
@@ -142,7 +156,7 @@ class SupermarketDetailScreen extends StatelessWidget {
               const SizedBox(height: 10),
 
               const Text(
-                "Products",
+                "Product Catalogue",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -151,30 +165,26 @@ class SupermarketDetailScreen extends StatelessWidget {
 
               const SizedBox(height: 15),
 
-              _comingSoonCard(
-                icon: Icons.shopping_bag,
-                title: "Product Catalogue",
-                subtitle:
-                "Products available in this supermarket will appear here.",
-              ),
-
-              const SizedBox(height: 20),
-
-              const Text(
-                "Promotions",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              matchAsync.when(
+                data: (match) => match == null
+                    ? _infoCard(
+                        icon: Icons.shopping_bag,
+                        title: "No product data yet",
+                        subtitle: "Products available in this supermarket will appear here.",
+                      )
+                    : _StoreCatalogSection(
+                        premiseCode: match.supermarket.premiseCode,
+                        isApproximateMatch: match.isApproximate,
+                      ),
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: CircularProgressIndicator()),
                 ),
-              ),
-
-              const SizedBox(height: 15),
-
-              _comingSoonCard(
-                icon: Icons.local_offer,
-                title: "Latest Promotions",
-                subtitle:
-                "Current supermarket promotions will appear here.",
+                error: (_, _) => _infoCard(
+                  icon: Icons.shopping_bag,
+                  title: "Could not load products",
+                  subtitle: "Please check your connection and try again.",
+                ),
               ),
 
               const SizedBox(height: 20),
@@ -189,11 +199,20 @@ class SupermarketDetailScreen extends StatelessWidget {
 
               const SizedBox(height: 15),
 
-              _comingSoonCard(
-                icon: Icons.compare_arrows,
-                title: "Compare Prices",
-                subtitle:
-                "Compare product prices with other supermarkets.",
+              matchAsync.when(
+                data: (match) => match == null
+                    ? _infoCard(
+                        icon: Icons.compare_arrows,
+                        title: "No comparison data yet",
+                        subtitle: "Compare product prices with other supermarkets.",
+                      )
+                    : _PriceSavingsSection(premiseCode: match.supermarket.premiseCode),
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => _infoCard(
+                  icon: Icons.compare_arrows,
+                  title: "Could not load comparison",
+                  subtitle: "Please check your connection and try again.",
+                ),
               ),
 
               const SizedBox(height: 40),
@@ -204,7 +223,7 @@ class SupermarketDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _comingSoonCard({
+  static Widget _infoCard({
     required IconData icon,
     required String title,
     required String subtitle,
@@ -221,9 +240,157 @@ class SupermarketDetailScreen extends StatelessWidget {
         ),
         title: Text(title),
         subtitle: Text(subtitle),
-        trailing: const Chip(
-          label: Text("Coming Soon"),
+      ),
+    );
+  }
+}
+
+/// Product Catalogue: everything the matched premise stocks, capped so the
+/// page doesn't try to render hundreds of rows inline.
+class _StoreCatalogSection extends ConsumerWidget {
+  const _StoreCatalogSection({
+    required this.premiseCode,
+    required this.isApproximateMatch,
+  });
+
+  final String premiseCode;
+  final bool isApproximateMatch;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalogAsync = ref.watch(storeCatalogProvider(premiseCode));
+
+    return catalogAsync.when(
+      data: (entries) {
+        if (entries.isEmpty) {
+          return SupermarketDetailScreen._infoCard(
+            icon: Icons.shopping_bag,
+            title: "No products found",
+            subtitle: "We don't have price data for this store's products yet.",
+          );
+        }
+
+        final shown = entries.take(_maxCatalogItems).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isApproximateMatch)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Text(
+                  "Showing the closest matching store in our price database — "
+                  "it may not be an exact match.",
+                  style: TextStyle(fontSize: 12, color: Colors.black54, fontStyle: FontStyle.italic),
+                ),
+              ),
+            for (final entry in shown) ...[
+              _CatalogRow(entry: entry),
+              const SizedBox(height: 10),
+            ],
+            if (entries.length > shown.length)
+              Text(
+                "Showing $_maxCatalogItems of ${entries.length} products available at this store.",
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+          ],
+        );
+      },
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, _) => SupermarketDetailScreen._infoCard(
+        icon: Icons.shopping_bag,
+        title: "Could not load products",
+        subtitle: "Please check your connection and try again.",
+      ),
+    );
+  }
+}
+
+class _CatalogRow extends StatelessWidget {
+  const _CatalogRow({required this.entry});
+
+  final StoreCatalogEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 1,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.green.shade50,
+          child: const Icon(Icons.shopping_bag, color: Colors.green),
         ),
+        title: Text(entry.product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        subtitle: Text(entry.product.unit.isEmpty ? entry.product.itemCategory : entry.product.unit),
+        trailing: Text(
+          "RM${entry.price.toStringAsFixed(2)}",
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+        ),
+        onTap: () => context.push('/product/${entry.product.itemCode}'),
+      ),
+    );
+  }
+}
+
+/// Price Comparison: products at this store where a cheaper price exists at
+/// another store, biggest saving first.
+class _PriceSavingsSection extends ConsumerWidget {
+  const _PriceSavingsSection({required this.premiseCode});
+
+  final String premiseCode;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final savingsAsync = ref.watch(storeSavingsProvider(premiseCode));
+
+    return savingsAsync.when(
+      data: (savings) {
+        if (savings.isEmpty) {
+          return SupermarketDetailScreen._infoCard(
+            icon: Icons.emoji_events,
+            title: "Best prices found here",
+            subtitle: "This store already has the lowest price we've found for its products.",
+          );
+        }
+
+        final shown = savings.take(_maxSavingsItems).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final saving in shown) ...[
+              Card(
+                elevation: 1,
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFFFF3E0),
+                    child: Icon(Icons.trending_down, color: Colors.orange),
+                  ),
+                  title: Text(saving.entry.product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  subtitle: Text(
+                    "RM${saving.entry.price.toStringAsFixed(2)} here · "
+                    "RM${saving.cheaperPrice.toStringAsFixed(2)} elsewhere",
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/compare/${saving.entry.product.itemCode}'),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ],
+        );
+      },
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, _) => SupermarketDetailScreen._infoCard(
+        icon: Icons.compare_arrows,
+        title: "Could not load comparison",
+        subtitle: "Please check your connection and try again.",
       ),
     );
   }

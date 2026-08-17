@@ -1,12 +1,70 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/price.dart';
+import '../models/product.dart';
 import '../models/supermarket.dart';
 import '../repositories/price_repository.dart';
+import 'product_provider.dart';
 import 'supermarket_provider.dart';
 
 final priceRepositoryProvider = Provider<PriceRepository>((ref) {
   return PriceRepository();
+});
+
+/// A product stocked at a specific supermarket, paired with its current
+/// price there — backs the Nearby Supermarket detail screen's catalogue.
+typedef StoreCatalogEntry = ({Product product, double price});
+
+/// Products currently stocked at [premiseCode], alphabetical by name — backs
+/// the Nearby Supermarket detail screen's Product Catalogue section.
+final storeCatalogProvider =
+    FutureProvider.family<List<StoreCatalogEntry>, String>((ref, premiseCode) async {
+  final prices = await ref.watch(priceRepositoryProvider).getLatestPricesForPremise(premiseCode);
+  if (prices.isEmpty) return const [];
+
+  final products = await ref
+      .watch(productRepositoryProvider)
+      .getByIds(prices.map((p) => p.itemCode).toList());
+
+  final priceByItem = {for (final p in prices) p.itemCode: p.price};
+  final entries = [
+    for (final product in products) (product: product, price: priceByItem[product.itemCode]!),
+  ];
+  entries.sort((a, b) => a.product.name.compareTo(b.product.name));
+  return entries;
+});
+
+/// A [StoreCatalogEntry] paired with the cheapest price found for that
+/// product at any store — only entries where somewhere else is cheaper.
+typedef StoreSaving = ({StoreCatalogEntry entry, double cheaperPrice});
+
+/// Products at [premiseCode] that are cheaper elsewhere, biggest saving
+/// first — backs the Nearby Supermarket detail screen's Price Comparison
+/// section.
+///
+/// Keyed by [premiseCode] (a plain String, so Riverpod's family caching
+/// actually works) rather than by the item-code list directly — a
+/// `List<String>` built fresh in a widget's build() has a new identity every
+/// rebuild, so watching a `.family` provider keyed by one directly never
+/// settles: it looks like a brand new provider each time and restarts
+/// loading forever instead of ever showing data.
+final storeSavingsProvider =
+    FutureProvider.family<List<StoreSaving>, String>((ref, premiseCode) async {
+  final entries = await ref.watch(storeCatalogProvider(premiseCode).future);
+  if (entries.isEmpty) return const [];
+
+  final itemCodes = entries.map((e) => e.product.itemCode).toList();
+  final cheapestByItem = await ref.watch(priceRepositoryProvider).getCheapestPrices(itemCodes);
+
+  final savings = <StoreSaving>[];
+  for (final entry in entries) {
+    final cheapest = cheapestByItem[entry.product.itemCode]?.price;
+    if (cheapest != null && cheapest < entry.price) {
+      savings.add((entry: entry, cheaperPrice: cheapest));
+    }
+  }
+  savings.sort((a, b) => (b.entry.price - b.cheaperPrice).compareTo(a.entry.price - a.cheaperPrice));
+  return savings;
 });
 
 /// Current price for a product at every supermarket, cheapest first —
