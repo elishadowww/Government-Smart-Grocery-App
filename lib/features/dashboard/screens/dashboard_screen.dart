@@ -12,6 +12,7 @@ import '../../../providers/notification_provider.dart';
 import '../../../providers/price_provider.dart';
 import '../../../providers/recent_product_provider.dart';
 import '../widgets/app_drawer.dart';
+import '../../../core/localization/app_strings.dart';
 
 /// Dashboard (spec Fig 7.1.1): landing screen and navigation hub. Search,
 /// Nearby, Cart, Favourites, Notifications and Budget are wired to real
@@ -28,7 +29,7 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Smart Grocery'),
+        title: Text(ref.tr('app_name')),
         actions: [
           IconButton(
             icon: Badge(
@@ -41,7 +42,7 @@ class DashboardScreen extends ConsumerWidget {
           const CartAppBarAction(),
           IconButton(
             icon: const Icon(Icons.person_outline),
-            onPressed: () => showAppSnackBar(context, 'Coming soon'),
+            onPressed: () => showAppSnackBar(context, ref.tr('coming_soon')),
           ),
         ],
       ),
@@ -51,19 +52,19 @@ class DashboardScreen extends ConsumerWidget {
         children: [
           AppSearchBar(
             controller: TextEditingController(),
-            hintText: 'Search products...',
+            hintText: ref.tr('search_products'),
             readOnly: true,
             onTap: () => context.push('/search'),
           ),
           const SizedBox(height: 20),
-          const Text('Quick Actions', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+          Text(ref.tr('quick_actions'), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
           const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
                 child: _QuickAction(
                   icon: Icons.search,
-                  label: 'Search',
+                  label: ref.tr('search'),
                   onTap: () => context.push('/search'),
                 ),
               ),
@@ -71,7 +72,7 @@ class DashboardScreen extends ConsumerWidget {
               Expanded(
                 child: _QuickAction(
                   icon: Icons.storefront_outlined,
-                  label: 'Nearby',
+                  label: ref.tr('nearby'),
                   onTap: () => context.push('/nearby'),
                 ),
               ),
@@ -79,7 +80,7 @@ class DashboardScreen extends ConsumerWidget {
               Expanded(
                 child: _QuickAction(
                   icon: Icons.shopping_cart_outlined,
-                  label: 'Cart',
+                  label: ref.tr('cart'),
                   onTap: () => context.push('/cart'),
                 ),
               ),
@@ -87,8 +88,8 @@ class DashboardScreen extends ConsumerWidget {
               Expanded(
                 child: _QuickAction(
                   icon: Icons.trending_up,
-                  label: 'Trends',
-                  onTap: () => showAppSnackBar(context, 'Coming soon'),
+                  label: ref.tr('trends'),
+                  onTap: () => context.push('/price_trends'),
                 ),
               ),
             ],
@@ -99,17 +100,17 @@ class DashboardScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Price Alerts', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+              Text(ref.tr('price_alerts'), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
               GestureDetector(
                 onTap: () => context.push('/notifications'),
-                child: const Text('View All', style: TextStyle(color: AppColors.primary)),
+                child: Text( ref.tr('view_all'), style: TextStyle(color: AppColors.primary)),
               ),
             ],
           ),
           const SizedBox(height: 10),
           _PriceAlertsPreview(),
           const SizedBox(height: 24),
-          const Text('Recent Products', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+          Text(ref.tr('recent_products'), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
           const SizedBox(height: 10),
           const _RecentProducts(),
         ],
@@ -154,7 +155,7 @@ class _PriceAlertsPreview extends ConsumerWidget {
     final notifications = ref.watch(notificationsProvider).value ?? const [];
 
     if (notifications.isEmpty) {
-      return const AppEmptyState(icon: Icons.notifications_none, message: 'No price alerts yet.');
+      return AppEmptyState(icon: Icons.notifications_none, message: ref.tr('no_price_alerts'),);
     }
 
     return Column(
@@ -196,7 +197,7 @@ class _RecentProducts extends ConsumerWidget {
     final products = productsAsync.value ?? const [];
 
     if (products.isEmpty) {
-      return const AppEmptyState(icon: Icons.history, message: 'No recent products yet.');
+      return AppEmptyState(icon: Icons.history, message: ref.tr('no_recent_products'),);
     }
 
     final itemCodes = products.map((p) => p.itemCode).toList();

@@ -99,6 +99,25 @@ class NotificationsController {
       _ref.invalidate(unreadNotificationCountProvider);
     }
   }
+
+  // Mock Test For Notification Trigger
+  Future<void> simulatePriceChangeForTesting({bool isDrop = true}) async {
+    final uid = _ref.read(currentUidProvider);
+    if (uid == null) return;
+
+    final notifRepo = _ref.read(notificationRepositoryProvider);
+    final title = isDrop ? 'Cooking Oil price dropped' : 'Rice price increased';
+    final amount = isDrop ? 'RM2.00' : 'RM1.00';
+
+    await notifRepo.add(
+      uid,
+      title: title,
+      message: amount,
+    );
+
+    _ref.invalidate(notificationsProvider);
+    _ref.invalidate(unreadNotificationCountProvider);
+  }
 }
 
 final notificationsControllerProvider = Provider<NotificationsController>((ref) {

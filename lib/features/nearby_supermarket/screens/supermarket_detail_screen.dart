@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_strings.dart';
 
 import '../../../providers/price_provider.dart';
 import '../../../providers/supermarket_provider.dart';
@@ -102,8 +103,8 @@ class SupermarketDetailScreen extends ConsumerWidget {
                     ),
                     child: Text(
                       supermarket.isOpen
-                          ? "Open"
-                          : "Closed",
+                          ? ref.tr('open')
+                          : ref.tr('closed'),
                       style: TextStyle(
                         color: supermarket.isOpen
                             ? Colors.green
@@ -117,8 +118,8 @@ class SupermarketDetailScreen extends ConsumerWidget {
 
               const SizedBox(height: 30),
 
-              const Text(
-                "Address",
+              Text(
+                ref.tr('address'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -155,8 +156,8 @@ class SupermarketDetailScreen extends ConsumerWidget {
 
               const SizedBox(height: 10),
 
-              const Text(
-                "Product Catalogue",
+              Text(
+                ref.tr('product_catalogue'),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -169,8 +170,8 @@ class SupermarketDetailScreen extends ConsumerWidget {
                 data: (match) => match == null
                     ? _infoCard(
                         icon: Icons.shopping_bag,
-                        title: "No product data yet",
-                        subtitle: "Products available in this supermarket will appear here.",
+                        title: ref.tr('no_product_data_title'),
+                        subtitle: ref.tr('no_product_data_desc'),
                       )
                     : _StoreCatalogSection(
                         premiseCode: match.supermarket.premiseCode,
@@ -182,15 +183,15 @@ class SupermarketDetailScreen extends ConsumerWidget {
                 ),
                 error: (_, _) => _infoCard(
                   icon: Icons.shopping_bag,
-                  title: "Could not load products",
-                  subtitle: "Please check your connection and try again.",
+                  title: ref.tr('could_not_load_products'),
+                  subtitle: ref.tr('check_connection_retry'),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              const Text(
-                "Price Comparison",
+              Text(
+                ref.tr('price_comparison'),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -203,15 +204,15 @@ class SupermarketDetailScreen extends ConsumerWidget {
                 data: (match) => match == null
                     ? _infoCard(
                         icon: Icons.compare_arrows,
-                        title: "No comparison data yet",
-                        subtitle: "Compare product prices with other supermarkets.",
+                        title: ref.tr('no_comparison_data_title'),
+                        subtitle: ref.tr('no_comparison_data_desc'),
                       )
                     : _PriceSavingsSection(premiseCode: match.supermarket.premiseCode),
                 loading: () => const SizedBox.shrink(),
                 error: (_, _) => _infoCard(
                   icon: Icons.compare_arrows,
-                  title: "Could not load comparison",
-                  subtitle: "Please check your connection and try again.",
+                  title: ref.tr('could_not_load_comparison'),
+                  subtitle: ref.tr('check_connection_retry'),
                 ),
               ),
 
@@ -265,8 +266,8 @@ class _StoreCatalogSection extends ConsumerWidget {
         if (entries.isEmpty) {
           return SupermarketDetailScreen._infoCard(
             icon: Icons.shopping_bag,
-            title: "No products found",
-            subtitle: "We don't have price data for this store's products yet.",
+            title: ref.tr('no_products_found'),
+            subtitle: ref.tr('no_products_found_desc'),
           );
         }
 
@@ -276,11 +277,10 @@ class _StoreCatalogSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (isApproximateMatch)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text(
-                  "Showing the closest matching store in our price database — "
-                  "it may not be an exact match.",
+                  ref.tr('approximate_match_warning'),
                   style: TextStyle(fontSize: 12, color: Colors.black54, fontStyle: FontStyle.italic),
                 ),
               ),
@@ -290,7 +290,9 @@ class _StoreCatalogSection extends ConsumerWidget {
             ],
             if (entries.length > shown.length)
               Text(
-                "Showing $_maxCatalogItems of ${entries.length} products available at this store.",
+                ref.tr('showing_products_count')
+                    .replaceAll('{shown}', '${shown.length}')
+                    .replaceAll('{total}', '${entries.length}'),
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
           ],
@@ -302,8 +304,8 @@ class _StoreCatalogSection extends ConsumerWidget {
       ),
       error: (_, _) => SupermarketDetailScreen._infoCard(
         icon: Icons.shopping_bag,
-        title: "Could not load products",
-        subtitle: "Please check your connection and try again.",
+        title: ref.tr('could_not_load_products'),
+        subtitle: ref.tr('check_connection_retry'),
       ),
     );
   }
@@ -351,8 +353,8 @@ class _PriceSavingsSection extends ConsumerWidget {
         if (savings.isEmpty) {
           return SupermarketDetailScreen._infoCard(
             icon: Icons.emoji_events,
-            title: "Best prices found here",
-            subtitle: "This store already has the lowest price we've found for its products.",
+            title: ref.tr('best_prices_found_title'),
+            subtitle: ref.tr('best_prices_found_desc'),
           );
         }
 
@@ -371,8 +373,9 @@ class _PriceSavingsSection extends ConsumerWidget {
                   ),
                   title: Text(saving.entry.product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                   subtitle: Text(
-                    "RM${saving.entry.price.toStringAsFixed(2)} here · "
-                    "RM${saving.cheaperPrice.toStringAsFixed(2)} elsewhere",
+                    ref.tr('price_here_vs_elsewhere')
+                        .replaceAll('{here}', saving.entry.price.toStringAsFixed(2))
+                        .replaceAll('{elsewhere}', saving.cheaperPrice.toStringAsFixed(2)),
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/compare/${saving.entry.product.itemCode}'),
@@ -389,8 +392,8 @@ class _PriceSavingsSection extends ConsumerWidget {
       ),
       error: (_, _) => SupermarketDetailScreen._infoCard(
         icon: Icons.compare_arrows,
-        title: "Could not load comparison",
-        subtitle: "Please check your connection and try again.",
+        title: ref.tr('could_not_load_comparison'),
+        subtitle: ref.tr('check_connection_retry'),
       ),
     );
   }

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../models/supermarket.dart';
+import '../../../core/localization/app_strings.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// One store's row on the price comparison screen (spec Fig 7.3.3): name,
 /// price, distance (real, geocoded — see providers/store_distance_provider),
 /// and a "Cheapest" tag on the lowest-priced store.
-class ComparisonRow extends StatelessWidget {
+class ComparisonRow extends ConsumerWidget {
   const ComparisonRow({
     super.key,
     required this.supermarket,
@@ -25,7 +27,7 @@ class ComparisonRow extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: AppColors.white,
       borderRadius: BorderRadius.circular(12),
@@ -62,8 +64,8 @@ class ComparisonRow extends StatelessWidget {
                               color: AppColors.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Text(
-                              'Cheapest',
+                            child: Text(
+                              ref.tr('cheapest'),
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontSize: 11,
@@ -76,7 +78,7 @@ class ComparisonRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _distanceLabel(),
+                      _distanceLabel(ref),
                       style: const TextStyle(color: AppColors.grey, fontSize: 12),
                     ),
                   ],
@@ -104,8 +106,8 @@ class ComparisonRow extends StatelessWidget {
     );
   }
 
-  String _distanceLabel() {
-    if (distanceLoading) return 'Locating…';
+  String _distanceLabel(WidgetRef ref) {
+    if (distanceLoading) return ref.tr('locating');
     if (distanceKm == null) return supermarket.address;
     return '${distanceKm!.toStringAsFixed(1)} km';
   }

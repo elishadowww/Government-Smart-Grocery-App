@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/widgets/app_skeleton.dart';
 import '../../../core/widgets/inline_error.dart';
 import '../../../models/price.dart';
@@ -59,7 +60,7 @@ class _StorePickerSheet extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Choose a Store', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(ref.tr('choose_a_store'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 2),
               Text(
                 productName,
@@ -68,7 +69,7 @@ class _StorePickerSheet extends ConsumerWidget {
                 style: const TextStyle(color: AppColors.grey),
               ),
               const SizedBox(height: 16),
-              Flexible(child: _buildBody(pricesAsync, storesAsync)),
+              Flexible(child: _buildBody(ref, pricesAsync, storesAsync)),
             ],
           ),
         ),
@@ -76,21 +77,21 @@ class _StorePickerSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildBody(AsyncValue<List<Price>> pricesAsync, AsyncValue<List<Supermarket>> storesAsync) {
+  Widget _buildBody(WidgetRef ref, AsyncValue<List<Price>> pricesAsync, AsyncValue<List<Supermarket>> storesAsync) {
     if (pricesAsync.isLoading || storesAsync.isLoading) {
       return const SkeletonListLoader(itemCount: 3);
     }
     if (pricesAsync.hasError || storesAsync.hasError) {
-      return const InlineError(message: 'Could not load store options for this product.');
+      return InlineError(message: ref.tr('could_not_load_store_options'));
     }
 
     final prices = pricesAsync.value ?? const [];
     final stores = storesAsync.value ?? const [];
     if (prices.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Text(
-          'No store currently has a price for this product.',
+          ref.tr('no_store_price_available'),
           style: TextStyle(color: AppColors.grey),
         ),
       );

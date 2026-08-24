@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/localization/app_strings.dart';
 import '../../../app/theme/app_colors.dart';
 import '../repositories/auth_repositories.dart';
 
-class IntroScreen extends StatelessWidget {
+class IntroScreen extends ConsumerWidget {
   const IntroScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -36,8 +38,8 @@ class IntroScreen extends StatelessWidget {
 
                   const SizedBox(height: 18),
 
-                  const Text(
-                    "Smart Grocery",
+                  Text(
+                      ref.tr('smart_grocery'),
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 38,
@@ -45,8 +47,8 @@ class IntroScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const Text(
-                    "Shopping Assistant",
+                  Text(
+                    ref.tr('shopping_assistant'),
                     style: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.w600,
@@ -73,7 +75,7 @@ class IntroScreen extends StatelessWidget {
                     height: 56,
                     child: ElevatedButton(
                       onPressed: () => context.push('/login'),
-                      child: const Text("Login"),
+                      child: Text(ref.tr('login')),
                     ),
                   ),
 
@@ -84,7 +86,7 @@ class IntroScreen extends StatelessWidget {
                     height: 56,
                     child: OutlinedButton(
                       onPressed: () => context.push('/register'),
-                      child: const Text("Register"),
+                      child: Text(ref.tr('register')),
                     ),
                   ),
 
@@ -94,8 +96,8 @@ class IntroScreen extends StatelessWidget {
                     onTap: () async {
                       await AuthRepository().signInAnonymously();
                     },
-                    child: const Text(
-                      "Continue as Guest",
+                    child: Text(
+                      ref.tr('continue_as_guest'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,

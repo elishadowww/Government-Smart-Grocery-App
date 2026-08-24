@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/utils/category_icons.dart';
 import '../../../models/product.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 
 /// A saved product row (spec saved_product_screen.png): thumbnail, name,
 /// category, cheapest price + store, unsave heart and an overflow menu.
-class SavedProductTile extends StatelessWidget {
+class SavedProductTile extends ConsumerWidget {
   const SavedProductTile({
     super.key,
     required this.product,
@@ -25,7 +27,7 @@ class SavedProductTile extends StatelessWidget {
   final VoidCallback onAddToCart;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: AppColors.white,
       borderRadius: BorderRadius.circular(12),
@@ -70,7 +72,7 @@ class SavedProductTile extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          price == null ? 'Price unavailable' : 'RM${price!.toStringAsFixed(2)}',
+                          price == null ? ref.tr('price_unavailable') : 'RM${price!.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
@@ -113,10 +115,10 @@ class SavedProductTile extends StatelessWidget {
                       if (value == 'add') onAddToCart();
                       if (value == 'open') onOpen();
                     },
-                    itemBuilder: (context) => const [
-                      PopupMenuItem(value: 'open', child: Text('View Details')),
-                      PopupMenuItem(value: 'add', child: Text('Add to Cart')),
-                      PopupMenuItem(value: 'remove', child: Text('Remove')),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(value: 'open', child: Text(ref.tr('view_details'))),
+                      PopupMenuItem(value: 'add', child: Text(ref.tr('add_to_cart'))),
+                      PopupMenuItem(value: 'remove', child: Text(ref.tr('remove'))),
                     ],
                   ),
                 ],
