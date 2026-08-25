@@ -19,6 +19,14 @@ class AppNotification extends Equatable {
   final DateTime createdAt;
   final bool read;
 
+  String get searchQuery {
+    return title
+        .replaceAll(RegExp(r'\s+price\s+(dropped|increased)$', caseSensitive: false), '')
+        .trim();
+  }
+
+  bool get isDrop => title.toLowerCase().contains('dropped');
+
   factory AppNotification.fromMap(Map<String, Object?> row) {
     return AppNotification(
       id: row[NotificationColumns.id] as int,

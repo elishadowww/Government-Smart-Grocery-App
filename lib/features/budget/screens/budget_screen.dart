@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_strings.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
@@ -34,7 +35,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   Future<void> _save() async {
     final amount = double.tryParse(_controller.text.trim());
     if (amount == null || amount <= 0) {
-      showAppSnackBar(context, 'Enter a valid budget amount', isError: true);
+      showAppSnackBar(context, ref.tr('enter_valid_budget_amount'), isError: true);
       return;
     }
 
@@ -45,7 +46,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
     showAppSnackBar(
       context,
-      ok ? 'Budget saved' : 'Could not save your budget',
+      ok ? ref.tr('budget_saved') : ref.tr('could_not_save_budget'),
       isError: !ok,
     );
   }
@@ -67,10 +68,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('My Budget')),
+      appBar: AppBar(title: Text(ref.tr('my_budget'))),
       body: budgetAsync.hasError
           ? InlineError(
-              message: 'Could not load your budget.',
+              message: ref.tr('could_not_load_budget'),
               onRetry: () => ref.invalidate(budgetProvider),
             )
           : ListView(
@@ -114,7 +115,7 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-class _SetBudgetCard extends StatelessWidget {
+class _SetBudgetCard extends ConsumerWidget {
   const _SetBudgetCard({required this.controller, required this.saving, required this.onSave});
 
   final TextEditingController controller;
@@ -122,16 +123,16 @@ class _SetBudgetCard extends StatelessWidget {
   final VoidCallback onSave;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return _SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.account_balance_wallet_outlined, color: AppColors.primary, size: 20),
               SizedBox(width: 8),
-              Text('Set Budget', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(ref.tr('set_budget'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           const SizedBox(height: 14),
@@ -162,7 +163,7 @@ class _SetBudgetCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               AppButton(
-                label: 'Save Budget',
+                label: ref.tr('save_budget'),
                 icon: Icons.save_outlined,
                 dense: true,
                 expand: false,
@@ -177,7 +178,7 @@ class _SetBudgetCard extends StatelessWidget {
   }
 }
 
-class _BudgetUsedCard extends StatelessWidget {
+class _BudgetUsedCard extends ConsumerWidget {
   const _BudgetUsedCard({required this.used, required this.total, required this.progress});
 
   final double used;
@@ -185,7 +186,7 @@ class _BudgetUsedCard extends StatelessWidget {
   final double progress;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     final exceeded = progress > 1;
     final barColor = exceeded ? AppColors.error : AppColors.primary;
     final percentLabel = '${(progress * 100).clamp(0, 999).toStringAsFixed(0)}%';
@@ -194,7 +195,7 @@ class _BudgetUsedCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Budget Used', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(ref.tr('budget_used'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -227,13 +228,13 @@ class _BudgetUsedCard extends StatelessWidget {
           ),
           if (exceeded) ...[
             const SizedBox(height: 10),
-            const Row(
+            Row(
               children: [
                 Icon(Icons.warning_amber_rounded, size: 16, color: AppColors.error),
                 SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'You have exceeded your budget.',
+                    ref.tr('exceeded_budget_message'),
                     style: TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -263,7 +264,7 @@ class _CheaperAlternativesCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Cheaper Alternatives', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(ref.tr('cheaper_alternatives'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 10),
             for (final alt in alternatives.take(5)) ...[
               _AlternativeTile(alternative: alt),
@@ -276,13 +277,13 @@ class _CheaperAlternativesCard extends ConsumerWidget {
   }
 }
 
-class _AlternativeTile extends StatelessWidget {
+class _AlternativeTile extends ConsumerWidget {
   const _AlternativeTile({required this.alternative});
 
   final CheaperAlternative alternative;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return Material(
       color: AppColors.primary.withValues(alpha: 0.06),
       borderRadius: BorderRadius.circular(10),
@@ -307,14 +308,14 @@ class _AlternativeTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Try ${alternative.alternative.name}',
+                      ref.tr('try_alternative').replaceAll('{name}', alternative.alternative.name),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Save RM${alternative.savings.toStringAsFixed(2)}',
+                      ref.tr('save_amount').replaceAll('{amount}', alternative.savings.toStringAsFixed(2)),
                       style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ],

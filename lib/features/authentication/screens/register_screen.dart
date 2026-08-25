@@ -2,18 +2,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/localization/app_strings.dart';
 import '../../../app/theme/app_colors.dart';
 import '../repositories/auth_repositories.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _repository = AuthRepository();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
@@ -59,8 +61,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               const SizedBox(height: 26),
 
-              const Text(
-                "Create Your Account",
+              Text(
+                ref.tr('create_your_account'),
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
@@ -70,8 +72,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               const SizedBox(height: 6),
 
-              const Text(
-                "Sign up to get started with Smart Grocery",
+              Text(
+                ref.tr('sign_up_subtitle'),
                 style: TextStyle(
                   color: Colors.black54,
                 ),
@@ -82,7 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextFormField(
                 controller: fullNameController,
                 decoration: InputDecoration(
-                  hintText: "Full Name",
+                  hintText: ref.tr('full_name'),
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -91,7 +93,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return "Please enter your name";
+                    return ref.tr('please_enter_name');
                   }
 
                   return null;
@@ -103,7 +105,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(
-                  hintText: "Email Address",
+                  hintText: ref.tr('email_address'),
                   prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -112,7 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return "Please enter your email";
+                    return ref.tr('please_enter_email');
                   }
 
                   final email = value.trim();
@@ -120,7 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   if (!RegExp(
                     r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
                   ).hasMatch(email)) {
-                    return "Please enter a valid email address";
+                    return ref.tr('please_enter_valid_email');
                   }
 
                   return null;
@@ -134,7 +136,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: obscurePassword,
 
                 decoration: InputDecoration(
-                  hintText: "Password",
+                  hintText: ref.tr('password'),
 
                   prefixIcon: const Icon(Icons.lock_outline),
 
@@ -158,23 +160,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please enter a password";
+                    return ref.tr('please_enter_password');
                   }
 
                   if (value.length < 8) {
-                    return "Password must be at least 8 characters";
+                    return ref.tr('password_length_error');
                   }
 
                   if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                    return "Password must contain an uppercase letter";
+                    return ref.tr('password_uppercase_error');
                   }
 
                   if (!RegExp(r'[a-z]').hasMatch(value)) {
-                    return "Password must contain a lowercase letter";
+                    return ref.tr('password_lowercase_error');
                   }
 
                   if (!RegExp(r'\d').hasMatch(value)) {
-                    return "Password must contain a number";
+                    return ref.tr('password_number_error');
                   }
 
                   return null;
@@ -188,7 +190,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: obscureConfirmPassword,
 
                 decoration: InputDecoration(
-                  hintText: "Confirm Password",
+                  hintText: ref.tr('confirm_password'),
 
                   prefixIcon: const Icon(Icons.lock_outline),
 
@@ -213,7 +215,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 validator: (value) {
                   if (value != passwordController.text) {
-                    return "Passwords do not match";
+                    return ref.tr('passwords_do_not_match');
                   }
 
                   return null;
@@ -246,12 +248,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         children: [
 
-                          const TextSpan(
-                            text: "I agree to the ",
+                          TextSpan(
+                            text: ref.tr('i_agree_to'),
                           ),
 
                           TextSpan(
-                            text: "Terms of Service",
+                            text: ref.tr('terms_of_service'),
                             style: const TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
@@ -263,12 +265,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               },
                           ),
 
-                          const TextSpan(
-                            text: " and ",
+                          TextSpan(
+                            text: ref.tr('and'),
                           ),
 
                           TextSpan(
-                            text: "Privacy Policy",
+                            text: ref.tr('privacy_policy'),
                             style: const TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
@@ -304,9 +306,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     if (!agreeTerms) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            "Please accept the Terms of Service.",
+                            ref.tr('accept_terms_warning'),
                           ),
                         ),
                       );
@@ -328,9 +330,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (!mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            "Account created! Please verify your email.",
+                            ref.tr('account_created_verify'),
                           ),
                         ),
                       );
@@ -342,7 +344,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            e.message ?? "Registration failed.",
+                            e.message ?? ref.tr('registration_failed'),
                           ),
                         ),
                       );
@@ -355,8 +357,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     }
                   },
 
-                  child: const Text(
-                    "Register",
+                  child: Text(
+                    ref.tr('register'),
                     style: TextStyle(fontSize: 16),
                   ),
                 ),
@@ -372,7 +374,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: Text(
-                      "or",
+                      ref.tr('or'),
                       style: TextStyle(
                         color: Colors.grey.shade700,
                       ),
@@ -406,7 +408,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            e.message ?? "Google sign in failed.",
+                            e.message ?? ref.tr('google_sign_in_failed'),
                           ),
                         ),
                       );
@@ -421,8 +423,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   icon: const Icon(Icons.g_mobiledata),
 
-                  label: const Text(
-                    "Sign up with Google",
+                  label: Text(
+                    ref.tr('sign_up_with_google'),
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -436,15 +438,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
 
-                  const Text(
-                    "Already have an account? ",
+                  Text(
+                    ref.tr('already_have_account_question'),
                   ),
 
                   GestureDetector(
                     onTap: () => context.pop(),
 
-                    child: const Text(
-                      "Login",
+                    child: Text(
+                      ref.tr('login'),
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,

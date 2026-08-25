@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../../core/localization/app_strings.dart';
 import '../models/supermarket_model.dart';
 import '../services/location_service.dart';
 import '../services/supermarket_service.dart';
@@ -12,14 +14,14 @@ import '../widgets/supermarket_bottom_sheet.dart';
 
 import 'supermarket_detail_screen.dart';
 
-class MapScreen extends StatefulWidget {
+class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  ConsumerState<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenState extends ConsumerState<MapScreen> {
 
   final LocationService _locationService =
   LocationService();
@@ -290,8 +292,8 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Nearby Supermarkets",
+        title: Text(
+          ref.tr('nearby_supermarkets'),
         ),
         centerTitle: true,
       ),
@@ -435,8 +437,8 @@ class _MapScreenState extends State<MapScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [
-                          const Text(
-                            "Nearby Stores",
+                          Text(
+                            ref.tr('nearby_stores'),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -444,7 +446,7 @@ class _MapScreenState extends State<MapScreen> {
                           ),
                           const Spacer(),
                           Text(
-                            "${_filteredSupermarkets.length} found",
+                            "${_filteredSupermarkets.length} ${ref.tr('found')}",
                             style: TextStyle(
                               color: Colors.grey.shade600,
                             ),
@@ -457,9 +459,9 @@ class _MapScreenState extends State<MapScreen> {
 
                     Expanded(
                       child: _filteredSupermarkets.isEmpty
-                          ? const Center(
+                          ? Center(
                         child: Text(
-                          "No supermarkets found.",
+                          ref.tr('no_supermarkets_found'),
                         ),
                       )
                           : ListView.builder(

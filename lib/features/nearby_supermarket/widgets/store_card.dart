@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/supermarket_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 
-class StoreCard extends StatelessWidget {
+class StoreCard extends ConsumerWidget {
   final SupermarketModel supermarket;
   final VoidCallback onTap;
 
@@ -12,7 +14,7 @@ class StoreCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -119,8 +121,8 @@ class StoreCard extends StatelessWidget {
                           ),
                           child: Text(
                             supermarket.isOpen
-                                ? "Open"
-                                : "Closed",
+                                ? ref.tr('open')
+                                : ref.tr('closed'),
                             style: TextStyle(
                               color: supermarket.isOpen
                                   ? Colors.green

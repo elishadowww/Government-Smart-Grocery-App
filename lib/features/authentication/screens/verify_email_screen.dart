@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../repositories/auth_repositories.dart';
 
-class VerifyEmailScreen extends StatefulWidget {
+class VerifyEmailScreen extends ConsumerStatefulWidget {
   const VerifyEmailScreen({super.key});
 
   @override
-  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
+  ConsumerState<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
 }
 
-class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
+class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   final _repository = AuthRepository();
 
   bool checking = false;
@@ -35,9 +37,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text(
-          "Your email is still not verified. Please check your inbox and spam folder.",
+          ref.tr('email_not_verified_warning'),
         ),
       ),
     );
@@ -49,9 +51,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text(
-          "Verification email sent.",
+          ref.tr('verification_email_sent'),
         ),
       ),
     );
@@ -75,8 +77,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
             const SizedBox(height: 28),
 
-            const Text(
-              "Verify your email",
+            Text(
+              ref.tr('verify_your_email'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 30,
@@ -87,8 +89,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
             const SizedBox(height: 16),
 
-            const Text(
-              "We've sent a verification email to your inbox.\n\nOnce you've verified your email, press the button below.",
+            Text(
+              ref.tr('verify_email_subtitle'),
               textAlign: TextAlign.center,
             ),
 
@@ -101,8 +103,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 onPressed: checking ? null : _checkVerification,
                 child: checking
                     ? const CircularProgressIndicator()
-                    : const Text(
-                  "I've Verified My Email",
+                    : Text(
+                  ref.tr('ive_verified_my_email'),
                 ),
               ),
             ),
@@ -114,8 +116,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               height: 54,
               child: OutlinedButton(
                 onPressed: _resend,
-                child: const Text(
-                  "Resend Verification Email",
+                child: Text(
+                  ref.tr('resend_verification_email'),
                 ),
               ),
             ),
@@ -131,11 +133,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     context: context,
                     builder: (context) {
                       return AlertDialog(
-                        title: const Text(
-                          "Cancel Registration?",
+                        title: Text(
+                          ref.tr('cancel_registration_title'),
                         ),
-                        content: const Text(
-                          "You'll be signed out and returned to the introduction screen. You can register again later with a different email address if needed.",
+                        content: Text(
+                            ref.tr('cancel_registration_message')
                         ),
                         actions: [
                           TextButton(
@@ -145,8 +147,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                                 false,
                               );
                             },
-                            child: const Text(
-                              "Stay",
+                            child: Text(
+                              ref.tr('stay'),
                             ),
                           ),
                           FilledButton(
@@ -156,8 +158,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                                 true,
                               );
                             },
-                            child: const Text(
-                              "Leave",
+                            child: Text(
+                              ref.tr('leave'),
                             ),
                           ),
                         ],
@@ -175,8 +177,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
                   context.go("/intro");
                 },
-                child: const Text(
-                  "Cancel Registration",
+                child: Text(
+                  ref.tr('cancel_registration'),
                 ),
               ),
             ),

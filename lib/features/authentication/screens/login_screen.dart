@@ -1,18 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../repositories/auth_repositories.dart';
+import '../../../core/localization/app_strings.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -41,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              e.message ?? "Google sign in failed.",
+              e.message ?? ref.tr('google_sign_in_failed'),
             ),
           ),
         );
@@ -91,19 +93,19 @@ class _LoginScreenState extends State<LoginScreen> {
         case "invalid-credential":
         case "user-not-found":
         case "wrong-password":
-          message = "Incorrect email or password.";
+          message = ref.tr('incorrect_email_or_password');
           break;
 
         case "user-disabled":
-          message = "This account has been disabled.";
+          message = ref.tr('account_disabled');
           break;
 
         case "too-many-requests":
-          message = "Too many login attempts. Please try again later.";
+          message = ref.tr('too_many_login_attempts');
           break;
 
         default:
-          message = "Login failed. Please try again.";
+          message = ref.tr('login_failed_try_again');
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -115,9 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            "Something went wrong.",
+            ref.tr('something_went_wrong'),
           ),
         ),
       );
@@ -161,8 +163,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 26),
 
-              const Text(
-                "Welcome Back!",
+              Text(
+                ref.tr('welcome_back'),
                 style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 38,
@@ -172,8 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 6),
 
-              const Text(
-                "Login to continue to your account",
+              Text(
+                ref.tr('login_subtitle'),
                 style: TextStyle(
                   color: Colors.black54,
                   fontSize: 15,
@@ -182,10 +184,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 42),
 
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "Email",
+                  ref.tr('email'),
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                   ),
@@ -198,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: emailController,
 
                 decoration: InputDecoration(
-                  hintText: "Enter your email",
+                  hintText: ref.tr('enter_your_email'),
 
                   prefixIcon: const Icon(Icons.email_outlined),
 
@@ -215,10 +217,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 22),
 
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "Password",
+                  ref.tr('password'),
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                   ),
@@ -232,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: _obscurePassword,
 
                 decoration: InputDecoration(
-                  hintText: "Enter your password",
+                  hintText: ref.tr('enter_your_password'),
 
                   prefixIcon: const Icon(Icons.lock_outline),
 
@@ -262,8 +264,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: GestureDetector(
                   onTap: () => context.push("/forgot"),
 
-                  child: const Text(
-                    "Forgot password?",
+                  child: Text(
+                    ref.tr('forgot_password_question'),
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 13,
@@ -289,8 +291,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.white,
                     ),
                   )
-                      : const Text(
-                    "Login",
+                      : Text(
+                    ref.tr('login'),
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -307,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: Text(
-                      "or",
+                      ref.tr('or'),
                       style: TextStyle(
                         color: Colors.grey.shade700,
                       ),
@@ -327,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: _isLoading ? null : _googleLogin,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Icon(
                         Icons.g_mobiledata,
                         size: 28,
@@ -335,7 +337,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          "Continue with Google",
+                          ref.tr('continue_with_google'),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 16,
@@ -353,15 +355,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
 
-                  const Text(
-                    "Don't have an account? ",
+                  Text(
+                    ref.tr('dont_have_account_question'),
                   ),
 
                   GestureDetector(
                     onTap: () => context.push("/register"),
 
-                    child: const Text(
-                      "Register",
+                    child: Text(
+                      ref.tr('register'),
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,

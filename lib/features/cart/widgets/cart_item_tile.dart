@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/utils/category_icons.dart';
 import '../../../providers/shopping_provider.dart';
 import 'quantity_selector.dart';
@@ -9,7 +11,7 @@ import 'quantity_selector.dart';
 /// quantity stepper, and a remove action. The store itself is shown once
 /// per group via the section header, not repeated per row — swipe the row
 /// (endToStart) to remove it as an alternative to the Remove label.
-class CartItemTile extends StatelessWidget {
+class CartItemTile extends ConsumerWidget {
   const CartItemTile({
     super.key,
     required this.entry,
@@ -24,7 +26,7 @@ class CartItemTile extends StatelessWidget {
   final VoidCallback onOpen;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return Material(
       color: AppColors.white,
       borderRadius: BorderRadius.circular(12),
@@ -66,8 +68,8 @@ class CartItemTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       entry.price == null
-                          ? 'Price unavailable'
-                          : 'RM${entry.price!.price.toStringAsFixed(2)} each',
+                          ? ref.tr('price_unavailable')
+                          : ref.tr('price_each').replaceAll('{price}', entry.price!.price.toStringAsFixed(2)),
                       style: const TextStyle(fontSize: 12, color: AppColors.grey),
                     ),
                   ],
@@ -81,8 +83,8 @@ class CartItemTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   GestureDetector(
                     onTap: onRemove,
-                    child: const Text(
-                      'Remove',
+                    child: Text(
+                      ref.tr('remove'),
                       style: TextStyle(fontSize: 11, color: AppColors.error),
                     ),
                   ),

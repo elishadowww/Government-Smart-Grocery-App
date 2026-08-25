@@ -15,6 +15,7 @@ import '../../../providers/product_provider.dart';
 import '../../../providers/shopping_provider.dart';
 import '../../../providers/store_distance_provider.dart';
 import '../widgets/comparison_card.dart';
+import '../../../core/localization/app_strings.dart';
 
 enum _ComparisonSort { price, distance, alphabetical }
 
@@ -40,9 +41,9 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
     if (!mounted) return;
     showAppSnackBar(
       context,
-      added ? 'Added to cart' : 'Please try again',
+      added ? ref.tr('added_to_cart') : ref.tr('please_try_again'),
       isError: !added,
-      actionLabel: added ? 'View' : null,
+      actionLabel: added ? ref.tr('view') : null,
       onAction: added ? () => context.push('/cart') : null,
     );
   }
@@ -54,8 +55,8 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
     final storesAsync = ref.watch(priceComparisonStoresProvider(widget.itemCode));
 
     final title = productAsync.value != null
-        ? 'Compare Prices — ${productAsync.value!.name}'
-        : 'Compare Prices';
+        ? '${ref.tr('compare_prices')} — ${productAsync.value!.name}'
+        : ref.tr('compare_prices');
 
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: const [CartAppBarAction()]),
@@ -73,13 +74,13 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
 
     if (pricesAsync.hasError) {
       return InlineError(
-        message: 'Could not load prices for this product.',
+        message: ref.tr('could_not_load_prices'),
         onRetry: () => ref.invalidate(latestPricesForItemProvider(widget.itemCode)),
       );
     }
     if (storesAsync.hasError) {
       return InlineError(
-        message: 'Could not load supermarket details.',
+        message: ref.tr('could_not_load_supermarkets'),
         onRetry: () => ref.invalidate(priceComparisonStoresProvider(widget.itemCode)),
       );
     }
@@ -88,9 +89,9 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
     final stores = storesAsync.value ?? const [];
 
     if (prices.isEmpty) {
-      return const AppEmptyState(
+      return AppEmptyState(
         icon: Icons.price_check,
-        message: 'No price data available for this product yet.',
+        message: ref.tr('no_price_data'),
       );
     }
 
@@ -121,20 +122,20 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
-            const Text('Sort:', style: TextStyle(color: AppColors.grey)),
+            Text(ref.tr('sort'), style: TextStyle(color: AppColors.grey)),
             const SizedBox(width: 8),
             DropdownButton<_ComparisonSort>(
               value: _sortBy,
               underline: const SizedBox.shrink(),
-              items: const [
-                DropdownMenuItem(value: _ComparisonSort.price, child: Text('Price')),
-                DropdownMenuItem(value: _ComparisonSort.distance, child: Text('Distance')),
-                DropdownMenuItem(value: _ComparisonSort.alphabetical, child: Text('Alphabetical')),
+              items: [
+                DropdownMenuItem(value: _ComparisonSort.price, child: Text(ref.tr('sort_price'))),
+                DropdownMenuItem(value: _ComparisonSort.distance, child: Text(ref.tr('sort_distance'))),
+                DropdownMenuItem(value: _ComparisonSort.alphabetical, child: Text(ref.tr('sort_alphabetical'))),
               ],
               onChanged: (value) => setState(() => _sortBy = value ?? _ComparisonSort.price),
             ),
             const Spacer(),
-            const Text('Tap a store to add', style: TextStyle(color: AppColors.grey, fontSize: 12)),
+            Text(ref.tr('tap_store_to_add'), style: TextStyle(color: AppColors.grey, fontSize: 12)),
           ],
         ),
         const SizedBox(height: 12),
@@ -174,7 +175,7 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
   }
 }
 
-class _StatsRow extends StatelessWidget {
+class _StatsRow extends ConsumerWidget {
   const _StatsRow({required this.lowest, required this.average, required this.highest});
 
   final double lowest;
@@ -182,7 +183,7 @@ class _StatsRow extends StatelessWidget {
   final double highest;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
@@ -191,9 +192,9 @@ class _StatsRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(child: _StatColumn(label: 'Lowest', value: lowest, color: AppColors.primary)),
-          Expanded(child: _StatColumn(label: 'Average', value: average, color: AppColors.text)),
-          Expanded(child: _StatColumn(label: 'Highest', value: highest, color: AppColors.error)),
+          Expanded(child: _StatColumn(label: ref.tr('lowest'), value: lowest, color: AppColors.primary)),
+          Expanded(child: _StatColumn(label: ref.tr('average'), value: average, color: AppColors.text)),
+          Expanded(child: _StatColumn(label: ref.tr('highest'), value: highest, color: AppColors.error)),
         ],
       ),
     );

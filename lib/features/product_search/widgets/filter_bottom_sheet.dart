@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 
 enum ProductSortBy { price, distance, alphabetical }
 
@@ -41,7 +43,7 @@ class ProductFilter {
 /// Filter bottom sheet matching filter_product_widget.png: Category
 /// dropdown, Price Range slider, Sort By (Price/Distance/Alphabetical),
 /// Reset/Apply.
-class FilterBottomSheet extends StatefulWidget {
+class FilterBottomSheet extends ConsumerStatefulWidget {
   const FilterBottomSheet({
     super.key,
     required this.initialFilter,
@@ -56,10 +58,10 @@ class FilterBottomSheet extends StatefulWidget {
   final double maxPriceBound;
 
   @override
-  State<FilterBottomSheet> createState() => _FilterBottomSheetState();
+  ConsumerState<FilterBottomSheet> createState() => _FilterBottomSheetState();
 }
 
-class _FilterBottomSheetState extends State<FilterBottomSheet> {
+class _FilterBottomSheetState extends ConsumerState<FilterBottomSheet> {
   late String? _category = widget.initialFilter.category;
   late RangeValues _priceRange = RangeValues(
     widget.initialFilter.minPrice,
@@ -95,12 +97,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            const Center(
-              child: Text('Filter', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+             Center(
+              child: Text(ref.tr('filter'), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 20),
 
-            const Text('Category', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            Text(ref.tr('category'), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 8),
             DropdownButtonFormField<String?>(
               value: _category,
@@ -116,7 +118,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 ),
               ),
               items: [
-                const DropdownMenuItem(value: null, child: Text('All Categories')),
+                DropdownMenuItem(value: null, child: Text(ref.tr('all_categories'))),
                 for (final category in widget.categories)
                   DropdownMenuItem(value: category, child: Text(category)),
               ],
@@ -124,7 +126,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             ),
             const SizedBox(height: 20),
 
-            const Text('Price Range', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            Text(ref.tr('price_range'), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -148,22 +150,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             ),
             const SizedBox(height: 12),
 
-            const Text('Sort By', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            Text(ref.tr('sort_by'), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 4),
             _SortOption(
-              label: 'Price',
+              label: ref.tr('sort_price'),
               value: ProductSortBy.price,
               groupValue: _sortBy,
               onChanged: (v) => setState(() => _sortBy = v),
             ),
             _SortOption(
-              label: 'Distance',
+              label: ref.tr('sort_distance'),
               value: ProductSortBy.distance,
               groupValue: _sortBy,
               onChanged: (v) => setState(() => _sortBy = v),
             ),
             _SortOption(
-              label: 'Alphabetical',
+              label: ref.tr('sort_alphabetical'),
               value: ProductSortBy.alphabetical,
               groupValue: _sortBy,
               onChanged: (v) => setState(() => _sortBy = v),
@@ -174,7 +176,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               children: [
                 Expanded(
                   child: AppButton(
-                    label: 'Reset',
+                    label: ref.tr('reset'),
                     type: AppButtonType.outlined,
                     icon: Icons.refresh,
                     onPressed: _reset,
@@ -183,7 +185,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: AppButton(
-                    label: 'Apply',
+                    label: ref.tr('apply'),
                     type: AppButtonType.filled,
                     icon: Icons.filter_alt,
                     onPressed: () {

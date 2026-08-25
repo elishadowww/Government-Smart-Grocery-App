@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
-class LocationErrorCard extends StatelessWidget {
+import '../../../core/localization/app_strings.dart';
+
+class LocationErrorCard extends ConsumerWidget {
   final String message;
   final VoidCallback onRetry;
 
@@ -18,7 +21,7 @@ class LocationErrorCard extends StatelessWidget {
       message.toLowerCase().contains("location permission");
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -45,8 +48,8 @@ class LocationErrorCard extends StatelessWidget {
 
                 Text(
                   _isGpsDisabled || _isPermissionDenied
-                      ? "Location Required"
-                      : "Couldn't Load Supermarkets",
+                      ? ref.tr('location_required')
+                      : ref.tr('could_not_load_supermarkets'),
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -57,9 +60,9 @@ class LocationErrorCard extends StatelessWidget {
 
                 Text(
                   _isGpsDisabled
-                      ? "Please turn on your device's location service to discover nearby supermarkets."
+                      ? ref.tr('location_service_disabled_msg')
                       : _isPermissionDenied
-                          ? "Please allow location permission to discover nearby supermarkets."
+                          ? ref.tr('location_permission_denied_msg')
                           : message,
                   textAlign: TextAlign.center,
                 ),
@@ -76,10 +79,10 @@ class LocationErrorCard extends StatelessWidget {
                     ),
                     label: Text(
                       _isGpsDisabled
-                          ? "Turn On Location"
+                          ? ref.tr('turn_on_location')
                           : _isPermissionDenied
-                              ? "Grant Permission"
-                              : "Retry",
+                              ? ref.tr('grant_permission')
+                              : ref.tr('retry'),
                     ),
                     onPressed: () async {
                       if (_isGpsDisabled) {
