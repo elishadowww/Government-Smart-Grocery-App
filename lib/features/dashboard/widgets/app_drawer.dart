@@ -8,10 +8,8 @@ import '../../../core/widgets/custom_snackbar.dart';
 import '../../authentication/repositories/auth_repositories.dart';
 import '../../../core/localization/app_strings.dart';
 
-/// Navigation drawer (spec Fig 7.1.2). Only screens that exist in this
-/// build (Dashboard, Search, Cart, Nearby, Favourites) navigate for real;
-/// modules outside this branch's scope (Price Trends, Profile, Settings,
-/// About) show a placeholder instead of a dead route.
+/// Navigation drawer (spec Fig 7.1.2). Only "About" remains out of this
+/// branch's scope and shows a placeholder instead of a dead route.
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
@@ -103,7 +101,10 @@ class AppDrawer extends ConsumerWidget {
                   _DrawerItem(
                     icon: Icons.person_outline,
                     label: ref.tr('profile'),
-                    onTap: () => _comingSoon(context, ref),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push('/profile');
+                    },
                   ),
                   _DrawerItem(
                     icon: Icons.settings_outlined,

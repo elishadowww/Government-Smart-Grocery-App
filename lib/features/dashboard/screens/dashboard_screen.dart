@@ -7,7 +7,6 @@ import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_search_bar.dart';
 import '../../../core/widgets/budget_card.dart';
 import '../../../core/widgets/cart_app_bar_action.dart';
-import '../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../providers/price_provider.dart';
 import '../../../providers/recent_product_provider.dart';
@@ -42,7 +41,7 @@ class DashboardScreen extends ConsumerWidget {
           const CartAppBarAction(),
           IconButton(
             icon: const Icon(Icons.person_outline),
-            onPressed: () => showAppSnackBar(context, ref.tr('coming_soon')),
+            onPressed: () => context.push('/profile'),
           ),
         ],
       ),

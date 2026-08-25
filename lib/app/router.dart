@@ -19,6 +19,7 @@ import '../../features/notification/screens/notification_center_screen.dart';
 import '../../features/product_search/screens/price_comparison_screen.dart';
 import '../../features/product_search/screens/product_detail_screen.dart';
 import '../../features/product_search/screens/search_screen.dart';
+import '../../features/profile/screens/profile_screen.dart';
 import '../../features/saved_products/screens/saved_products_screen.dart';
 import '../../features/price_trends/screens/trend_search_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
@@ -159,6 +160,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
     ),
   ],
 );
