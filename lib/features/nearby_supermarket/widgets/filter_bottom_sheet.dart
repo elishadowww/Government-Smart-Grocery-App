@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FilterBottomSheet extends StatefulWidget {
+import '../../../core/localization/app_strings.dart';
+
+class FilterBottomSheet extends ConsumerStatefulWidget {
   final bool openOnly;
   final double minimumRating;
   final double maximumDistance;
@@ -20,12 +23,12 @@ class FilterBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<FilterBottomSheet> createState() =>
+  ConsumerState<FilterBottomSheet> createState() =>
       _FilterBottomSheetState();
 }
 
 class _FilterBottomSheetState
-    extends State<FilterBottomSheet> {
+    extends ConsumerState<FilterBottomSheet> {
   late bool _openOnly;
   late double _rating;
   late double _distance;
@@ -64,8 +67,8 @@ class _FilterBottomSheetState
 
             const SizedBox(height: 20),
 
-            const Text(
-              "Filter Supermarkets",
+            Text(
+              ref.tr('filter_supermarkets'),
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -76,7 +79,7 @@ class _FilterBottomSheetState
 
             SwitchListTile(
               value: _openOnly,
-              title: const Text("Open Now"),
+              title: Text(ref.tr('open_now')),
               onChanged: (value) {
                 setState(() {
                   _openOnly = value;
@@ -86,8 +89,8 @@ class _FilterBottomSheetState
 
             const SizedBox(height: 10),
 
-            const Text(
-              "Minimum Rating",
+            Text(
+              ref.tr('minimum_rating'),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
               ),
@@ -107,13 +110,13 @@ class _FilterBottomSheetState
             ),
 
             Text(
-              "${_rating.toStringAsFixed(1)} ★ & Above",
+              "${_rating.toStringAsFixed(1)} ★ ${ref.tr('and_above')}",
             ),
 
             const SizedBox(height: 20),
 
-            const Text(
-              "Maximum Distance",
+            Text(
+              ref.tr('maximum_distance'),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
               ),
@@ -147,7 +150,7 @@ class _FilterBottomSheetState
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text("Cancel"),
+                    child: Text(ref.tr('cancel')),
                   ),
                 ),
 
@@ -164,7 +167,7 @@ class _FilterBottomSheetState
 
                       Navigator.pop(context);
                     },
-                    child: const Text("Apply"),
+                    child: Text(ref.tr('apply')),
                   ),
                 ),
               ],

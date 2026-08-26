@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_skeleton.dart';
 import '../../../core/widgets/custom_dialog.dart';
@@ -35,8 +36,8 @@ class CartScreen extends ConsumerWidget {
 
     showAppSnackBar(
       context,
-      'Removed ${entry.product.name}',
-      actionLabel: premiseCode != null ? 'Undo' : null,
+      ref.tr('removed_item').replaceAll('{name}', entry.product.name),
+      actionLabel: premiseCode != null ? ref.tr('undo') : null,
       onAction: premiseCode != null
           ? () => ref.read(shoppingListControllerProvider).restore(itemCode, premiseCode, quantity)
           : null,
@@ -50,7 +51,7 @@ class CartScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cart'),
+        title: Text(ref.tr('cart')),
         actions: [
           if ((entriesAsync.value ?? const []).isNotEmpty)
             IconButton(
@@ -58,8 +59,8 @@ class CartScreen extends ConsumerWidget {
               onPressed: () async {
                 final confirmed = await showConfirmDialog(
                   context,
-                  title: 'Clear Cart',
-                  message: 'This will remove every item from your cart.',
+                  title: ref.tr('clear_cart'),
+                  message: ref.tr('clear_cart_message'),
                 );
                 if (confirmed == true) {
                   await ref.read(shoppingListControllerProvider).clearAll();
@@ -73,8 +74,8 @@ class CartScreen extends ConsumerWidget {
           if (entries.isEmpty) {
             return AppEmptyState(
               icon: Icons.shopping_cart_outlined,
-              message: 'Your cart is empty.\nAdd products while browsing or comparing prices.',
-              actionLabel: 'Search Products',
+              message: ref.tr('empty_cart_message'),
+              actionLabel: ref.tr('search_products'),
               onAction: () => context.push('/search'),
             );
           }
@@ -90,7 +91,7 @@ class CartScreen extends ConsumerWidget {
             if (!groups.containsKey(key)) {
               groupOrder.add(key);
               groups[key] = [];
-              groupStoreName[key] = entry.storeName ?? 'Price unavailable';
+              groupStoreName[key] = entry.storeName ?? ref.tr('price_unavailable');
             }
             groups[key]!.add(entry);
           }
@@ -136,7 +137,7 @@ class CartScreen extends ConsumerWidget {
         },
         loading: () => const SkeletonListLoader(),
         error: (e, _) => InlineError(
-          message: 'Could not load your cart.',
+          message: ref.tr('could_not_load_cart'),
           onRetry: () => ref.invalidate(shoppingListEntriesProvider),
         ),
       ),
@@ -229,16 +230,16 @@ class _CheapestStoreCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.storefront, size: 18, color: AppColors.primary),
               SizedBox(width: 8),
-              Text('Cheapest Single Store', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(ref.tr('cheapest_single_store'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
             ],
           ),
           const SizedBox(height: 4),
-          const Text(
-            'If you bought everything from one store instead:',
+          Text(
+            ref.tr('single_store_comparison_subtitle'),
             style: TextStyle(fontSize: 12, color: AppColors.grey),
           ),
           const SizedBox(height: 10),
@@ -250,8 +251,12 @@ class _CheapestStoreCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       option.missingItemCount > 0
-                          ? '${option.storeName} (${option.missingItemCount} item'
-                              '${option.missingItemCount > 1 ? 's' : ''} unavailable)'
+                          ? ref
+                          .tr(option.missingItemCount == 1
+                          ? 'store_missing_items_singular'
+                          : 'store_missing_items_plural')
+                          .replaceAll('{store}', option.storeName)
+                          .replaceAll('{count}', '${option.missingItemCount}')
                           : option.storeName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -276,13 +281,13 @@ class _CheapestStoreCard extends ConsumerWidget {
   }
 }
 
-class _TotalBar extends StatelessWidget {
+class _TotalBar extends ConsumerWidget {
   const _TotalBar({required this.total});
 
   final double total;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
@@ -293,7 +298,7 @@ class _TotalBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Total Cost', style: TextStyle(fontSize: 15, color: AppColors.grey)),
+          Text(ref.tr('total_cost'), style: TextStyle(fontSize: 15, color: AppColors.grey)),
           Text(
             'RM${total.toStringAsFixed(2)}',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),

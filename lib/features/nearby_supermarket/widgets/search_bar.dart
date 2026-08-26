@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SearchBarWidget extends StatelessWidget {
+import '../../../core/localization/app_strings.dart';
+
+class SearchBarWidget extends ConsumerWidget {
   final TextEditingController controller;
   final VoidCallback? onFilterPressed;
   final ValueChanged<String>? onChanged;
@@ -13,7 +16,7 @@ class SearchBarWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return SizedBox(
       height: 52,
       child: Row(
@@ -24,7 +27,7 @@ class SearchBarWidget extends StatelessWidget {
               onChanged: onChanged,
               textInputAction: TextInputAction.search,
               decoration: InputDecoration(
-                hintText: "Search supermarket...",
+                hintText: ref.tr('search_supermarket_hint'),
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,

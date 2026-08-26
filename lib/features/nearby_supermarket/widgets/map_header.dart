@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/localization/app_strings.dart';
 import 'category_chip.dart';
 import 'search_bar.dart';
 
-class MapHeader extends StatelessWidget {
+class MapHeader extends ConsumerWidget {
   final TextEditingController searchController;
   final String selectedCategory;
   final ValueChanged<String> onSearchChanged;
@@ -20,7 +22,7 @@ class MapHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -54,21 +56,21 @@ class MapHeader extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 children: [
                   CategoryChip(
-                    label: "All",
+                    label: ref.tr('all'),
                     icon: Icons.apps,
                     isSelected: selectedCategory == "All",
                     onTap: () => onCategoryChanged("All"),
                   ),
 
                   CategoryChip(
-                    label: "Grocery",
+                    label: ref.tr('grocery'),
                     icon: Icons.shopping_basket,
                     isSelected: selectedCategory == "Grocery",
                     onTap: () => onCategoryChanged("Grocery"),
                   ),
 
                   CategoryChip(
-                    label: "Hypermarket",
+                    label: ref.tr('hypermarket'),
                     icon: Icons.store,
                     isSelected:
                     selectedCategory == "Hypermarket",
@@ -77,7 +79,7 @@ class MapHeader extends StatelessWidget {
                   ),
 
                   CategoryChip(
-                    label: "Convenience",
+                    label: ref.tr('convenience'),
                     icon: Icons.local_convenience_store,
                     isSelected:
                     selectedCategory == "Convenience",

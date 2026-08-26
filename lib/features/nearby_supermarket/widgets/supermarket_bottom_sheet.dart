@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/supermarket_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 
-class SupermarketBottomSheet extends StatelessWidget {
+class SupermarketBottomSheet extends ConsumerWidget {
   final SupermarketModel supermarket;
   final VoidCallback onNavigate;
   final VoidCallback onViewPrices;
@@ -14,7 +16,7 @@ class SupermarketBottomSheet extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
@@ -107,8 +109,8 @@ class SupermarketBottomSheet extends StatelessWidget {
                             ),
                             child: Text(
                               supermarket.isOpen
-                                  ? "Open"
-                                  : "Closed",
+                                  ? ref.tr('open')
+                                  : ref.tr('closed'),
                               style: TextStyle(
                                 color: supermarket.isOpen
                                     ? Colors.green
@@ -159,7 +161,7 @@ class SupermarketBottomSheet extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: onNavigate,
                     icon: const Icon(Icons.navigation),
-                    label: const Text("Navigate"),
+                    label: Text(ref.tr('navigate')),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.green,
@@ -180,7 +182,7 @@ class SupermarketBottomSheet extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: onViewPrices,
                     icon: const Icon(Icons.local_offer),
-                    label: const Text("View Prices"),
+                    label: Text(ref.tr('view_prices')),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,

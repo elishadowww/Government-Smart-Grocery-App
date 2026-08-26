@@ -6,18 +6,17 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../authentication/repositories/auth_repositories.dart';
+import '../../../core/localization/app_strings.dart';
 
-/// Navigation drawer (spec Fig 7.1.2). Only screens that exist in this
-/// build (Dashboard, Search, Cart, Nearby, Favourites) navigate for real;
-/// modules outside this branch's scope (Price Trends, Profile, Settings,
-/// About) show a placeholder instead of a dead route.
+/// Navigation drawer (spec Fig 7.1.2). Only "About" remains out of this
+/// branch's scope and shows a placeholder instead of a dead route.
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = FirebaseAuth.instance.currentUser;
-    final identity = user == null || user.isAnonymous ? 'Guest' : (user.email ?? 'Registered User');
+    final identity = user == null || user.isAnonymous ? ref.tr('guest'): (user.email ?? ref.tr('registered_user'));
 
     return Drawer(
       child: SafeArea(
@@ -30,8 +29,8 @@ class AppDrawer extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Smart Grocery',
+                  Text(
+                    ref.tr('app_name'),
                     style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
@@ -45,7 +44,7 @@ class AppDrawer extends ConsumerWidget {
                 children: [
                   _DrawerItem(
                     icon: Icons.dashboard_outlined,
-                    label: 'Dashboard',
+                    label: ref.tr('dashboard'),
                     onTap: () {
                       Navigator.of(context).pop();
                       context.go('/dashboard');
@@ -53,7 +52,7 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _DrawerItem(
                     icon: Icons.search,
-                    label: 'Search Products',
+                    label: ref.tr('search_products_menu'),
                     onTap: () {
                       Navigator.of(context).pop();
                       context.push('/search');
@@ -61,7 +60,7 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _DrawerItem(
                     icon: Icons.shopping_cart_outlined,
-                    label: 'Cart',
+                    label: ref.tr('cart'),
                     onTap: () {
                       Navigator.of(context).pop();
                       context.push('/cart');
@@ -69,7 +68,7 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _DrawerItem(
                     icon: Icons.storefront_outlined,
-                    label: 'Nearby Supermarkets',
+                    label: ref.tr('nearby_supermarkets'),
                     onTap: () {
                       Navigator.of(context).pop();
                       context.push('/nearby');
@@ -77,12 +76,15 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _DrawerItem(
                     icon: Icons.trending_up,
-                    label: 'Price Trends',
-                    onTap: () => _comingSoon(context),
+                    label: ref.tr('price_trends'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push('/price_trends');
+                    },
                   ),
                   _DrawerItem(
                     icon: Icons.account_balance_wallet_outlined,
-                    label: 'My Budget',
+                    label: ref.tr('my_budget'),
                     onTap: () {
                       Navigator.of(context).pop();
                       context.push('/budget');
@@ -90,7 +92,7 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _DrawerItem(
                     icon: Icons.favorite_border,
-                    label: 'Favourites',
+                    label: ref.tr('favourites'),
                     onTap: () {
                       Navigator.of(context).pop();
                       context.push('/favourites');
@@ -98,18 +100,24 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _DrawerItem(
                     icon: Icons.person_outline,
-                    label: 'Profile',
-                    onTap: () => _comingSoon(context),
+                    label: ref.tr('profile'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push('/profile');
+                    },
                   ),
                   _DrawerItem(
                     icon: Icons.settings_outlined,
-                    label: 'Settings',
-                    onTap: () => _comingSoon(context),
+                    label: ref.tr('settings'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push('/settings');
+                    },
                   ),
                   _DrawerItem(
                     icon: Icons.info_outline,
-                    label: 'About',
-                    onTap: () => _comingSoon(context),
+                    label: ref.tr('about'),
+                    onTap: () => _comingSoon(context, ref),
                   ),
                 ],
               ),
@@ -117,7 +125,7 @@ class AppDrawer extends ConsumerWidget {
             const Divider(height: 1),
             _DrawerItem(
               icon: Icons.logout,
-              label: 'Logout',
+              label: ref.tr('logout'),
               color: AppColors.error,
               onTap: () async {
                 Navigator.of(context).pop();
@@ -131,9 +139,9 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  void _comingSoon(BuildContext context) {
+  void _comingSoon(BuildContext context, WidgetRef ref) {
     Navigator.of(context).pop();
-    showAppSnackBar(context, 'Coming soon');
+    showAppSnackBar(context, ref.tr('coming_soon'));
   }
 }
 

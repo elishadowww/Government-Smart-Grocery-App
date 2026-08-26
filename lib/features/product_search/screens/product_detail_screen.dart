@@ -19,6 +19,7 @@ import '../../../providers/saved_product_provider.dart';
 import '../../../providers/shopping_provider.dart';
 import '../../cart/widgets/store_picker_sheet.dart';
 import '../widgets/comparison_card.dart';
+import '../../../core/localization/app_strings.dart';
 
 enum _PriceTrend { rising, falling, stable }
 
@@ -57,10 +58,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final controller = ref.read(savedProductsControllerProvider);
     if (isSaved) {
       await controller.unsave(widget.itemCode);
-      if (mounted) showAppSnackBar(context, 'Removed from favourites');
+      if (mounted) showAppSnackBar(context, ref.tr('removed_from_favourites'));
     } else {
       await controller.save(widget.itemCode);
-      if (mounted) showAppSnackBar(context, 'Added to favourites');
+      if (mounted) showAppSnackBar(context, ref.tr('added_to_favourites'));
     }
   }
 
@@ -79,9 +80,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     setState(() => _addingToCart = false);
     showAppSnackBar(
       context,
-      added ? 'Added to cart' : 'Please try again',
+      added ? ref.tr('added_to_cart') : ref.tr('please_try_again'),
       isError: !added,
-      actionLabel: added ? 'View' : null,
+      actionLabel: added ? ref.tr('view') : null,
       onAction: added ? () => context.push('/cart') : null,
     );
   }
@@ -93,7 +94,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Details'),
+        title: Text(ref.tr('product_details')),
         actions: [
           IconButton(
             icon: Icon(
@@ -108,7 +109,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       body: productAsync.when(
         data: (product) {
           if (product == null) {
-            return const InlineError(message: 'This product could not be found.');
+            return InlineError(message: ref.tr('product_not_found'));
           }
           return _ProductDetailBody(
             itemCode: widget.itemCode,
@@ -120,14 +121,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         },
         loading: () => const AppLoading(),
         error: (e, _) => InlineError(
-          message: 'Could not load this product.',
+          message: ref.tr('could_not_load_product'),
           onRetry: () => ref.invalidate(productByIdProvider(widget.itemCode)),
         ),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: AppButton(
-          label: 'Add to Cart',
+          label: ref.tr('add_to_cart'),
           icon: Icons.shopping_cart_outlined,
           loading: _addingToCart,
           onPressed: _addToCart,
@@ -163,7 +164,7 @@ class _ProductDetailBody extends ConsumerWidget {
     }
     if (pricesAsync.hasError || storesAsync.hasError) {
       return InlineError(
-        message: 'Could not load pricing for this product.',
+        message: ref.tr('could_not_load_pricing'),
         onRetry: () {
           ref.invalidate(latestPricesForItemProvider(itemCode));
           ref.invalidate(priceComparisonStoresProvider(itemCode));
@@ -176,9 +177,9 @@ class _ProductDetailBody extends ConsumerWidget {
     final storeByCode = {for (final s in stores) s.premiseCode: s};
 
     if (prices.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.all(24),
-        child: Center(child: Text('No price data available for this product yet.')),
+        child: Center(child: Text(ref.tr('no_price_data'))),
       );
     }
 
@@ -224,8 +225,8 @@ class _ProductDetailBody extends ConsumerWidget {
                         color: AppColors.primary,
                       ),
                     ),
-                    const Text(
-                      'Price may vary by store',
+                    Text(
+                      ref.tr('price_varies_by_store'),
                       style: TextStyle(fontSize: 12, color: AppColors.grey),
                     ),
                   ],
@@ -245,7 +246,7 @@ class _ProductDetailBody extends ConsumerWidget {
                 Expanded(
                   child: _StatTile(
                     icon: Icons.storefront_outlined,
-                    label: 'Cheapest at',
+                    label: ref.tr('cheapest_at'),
                     value: cheapestStore?.name ?? '—',
                     valueColor: AppColors.primary,
                   ),
@@ -253,7 +254,7 @@ class _ProductDetailBody extends ConsumerWidget {
                 Expanded(
                   child: _StatTile(
                     icon: Icons.sell_outlined,
-                    label: 'Avg. Price',
+                    label: ref.tr('avg_price'),
                     value: 'RM${average.toStringAsFixed(2)}',
                   ),
                 ),
@@ -264,7 +265,7 @@ class _ProductDetailBody extends ConsumerWidget {
                         : trend == _PriceTrend.falling
                             ? Icons.trending_down
                             : Icons.trending_flat,
-                    label: 'Price Trend',
+                    label: ref.tr('price_trend'),
                     value: switch (trend) {
                       _PriceTrend.rising => 'Rising',
                       _PriceTrend.falling => 'Falling',
@@ -280,13 +281,13 @@ class _ProductDetailBody extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Price Comparison',
+              Text(ref.tr('price_comparison'),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               GestureDetector(
                 onTap: () => context.push('/compare/$itemCode'),
-                child: const Row(
+                child: Row(
                   children: [
-                    Text('View All Stores',
+                    Text(ref.tr('view_all_stores'),
                         style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                     Icon(Icons.chevron_right, color: AppColors.primary, size: 18),
                   ],
@@ -307,7 +308,7 @@ class _ProductDetailBody extends ConsumerWidget {
               const SizedBox(height: 10),
             ],
           const SizedBox(height: 14),
-          const Text('Product Information',
+          Text(ref.tr('product_information'),
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           Container(
@@ -319,9 +320,9 @@ class _ProductDetailBody extends ConsumerWidget {
             ),
             child: Column(
               children: [
-                _InfoRow(label: 'Category', value: category),
-                _InfoRow(label: 'Item Group', value: itemGroup),
-                _InfoRow(label: 'Unit', value: unit, isLast: true),
+                _InfoRow(label: ref.tr('category'), value: category),
+                _InfoRow(label: ref.tr('item_group'), value: itemGroup),
+                _InfoRow(label: ref.tr('unit'), value: unit, isLast: true),
               ],
             ),
           ),

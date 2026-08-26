@@ -27,6 +27,8 @@ import '../../cart/widgets/store_picker_sheet.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/product_list.dart';
 import '../widgets/search_suggestion.dart';
+import '../../../providers/search_query_provider.dart';
+import '../../../core/localization/app_strings.dart';
 
 /// Search Products screen (spec §7.3 / search_product_screen.png): search
 /// bar, recent searches, filter + results row, product cards.
@@ -55,6 +57,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _controller.text = widget.initialQuery!;
       _search();
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pendingQuery = ref.read(activeSearchQueryProvider);
+
+      if (pendingQuery.isNotEmpty) {
+        _controller.text = pendingQuery; // 1. Pre-fill search field
+        _search(); // 2. Trigger search query execution
+        ref.read(activeSearchQueryProvider.notifier).clear(); // 3. Clear provider state
+      }
+    });
   }
 
   @override
@@ -85,8 +96,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Future<void> _clearRecentSearches() async {
     final confirmed = await showConfirmDialog(
       context,
-      title: 'Clear Recent Searches',
-      message: 'This will remove all of your recent searches.',
+      title: ref.tr('clear_recent_searches_title'),
+      message: ref.tr('clear_recent_searches_message'),
     );
     if (confirmed == true) {
       await ref.read(recentSearchesControllerProvider).clearAll();
@@ -212,7 +223,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Something went wrong while searching.\n$e';
+        _error = '${ref.tr('search_error')}\n$e';
         _loading = false;
       });
     }
@@ -244,10 +255,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     if (isSaved) {
       await controller.unsave(product.itemCode);
-      if (mounted) showAppSnackBar(context, 'Removed from favourites');
+      if (mounted) showAppSnackBar(context, ref.tr('removed_from_favourites'));
     } else {
       await controller.save(product.itemCode);
-      if (mounted) showAppSnackBar(context, 'Added to favourites');
+      if (mounted) showAppSnackBar(context, ref.tr('added_to_favourites'));
     }
   }
 
@@ -263,9 +274,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (!mounted) return;
     showAppSnackBar(
       context,
-      added ? 'Added to cart' : 'Please try again',
+      added ? ref.tr('added_to_cart') : ref.tr('please_try_again'),
       isError: !added,
-      actionLabel: added ? 'View' : null,
+      actionLabel: added ? ref.tr('view') : null,
       onAction: added ? () => context.push('/cart') : null,
     );
   }
@@ -278,7 +289,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Products'),
+        title: Text(ref.tr('search_products_menu')),
         actions: const [CartAppBarAction()],
       ),
       body: Padding(
@@ -288,7 +299,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             AppSearchBar(
               controller: _controller,
-              hintText: 'Search products (e.g. ayam, beras, oil)...',
+              hintText: ref.tr('search_products_hint'),
               onChanged: _onQueryChanged,
               onSubmitted: _onSubmitted,
               autofocus: widget.initialQuery == null,
@@ -316,7 +327,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Filter',
+                          ref.tr('filter'),
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: _filter.isDefault ? AppColors.text : AppColors.primary,
@@ -331,7 +342,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 Container(width: 1, height: 16, color: AppColors.divider),
                 const SizedBox(width: 12),
                 if (_results != null)
-                  Text('Results: ${_results!.length}',
+                  Text('${ref.tr('results')}: ${_results!.length}',
                       style: const TextStyle(color: AppColors.grey)),
               ],
             ),
@@ -356,8 +367,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     if (_results!.isEmpty) {
       return AppEmptyState(
-        message: 'No products found — try another search.',
-        actionLabel: _filter.isDefault ? null : 'Clear Filters',
+        message: ref.tr('no_products_found'),
+        actionLabel: _filter.isDefault ? null : ref.tr('clear_filters'),
         onAction: _filter.isDefault
             ? null
             : () {
@@ -393,17 +404,17 @@ class _CategoryBrowse extends ConsumerWidget {
     return categoriesAsync.when(
       data: (categories) {
         if (categories.isEmpty) {
-          return const AppEmptyState(
+          return AppEmptyState(
             icon: Icons.search,
-            message: 'Search for a product to compare prices across supermarkets.',
+            message: ref.tr('search_prompt'),
           );
         }
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Or browse a category',
+              Text(
+                ref.tr('or_browse_category'),
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
               const SizedBox(height: 10),
@@ -430,9 +441,9 @@ class _CategoryBrowse extends ConsumerWidget {
         );
       },
       loading: () => const SkeletonListLoader(),
-      error: (e, _) => const AppEmptyState(
+      error: (e, _) => AppEmptyState(
         icon: Icons.search,
-        message: 'Search for a product to compare prices across supermarkets.',
+        message: ref.tr('search_prompt'),
       ),
     );
   }

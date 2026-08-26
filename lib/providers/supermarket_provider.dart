@@ -41,3 +41,9 @@ final supermarketByIdsProvider =
     FutureProvider.family<List<Supermarket>, List<String>>((ref, premiseCodes) {
   return ref.watch(supermarketRepositoryProvider).getByIds(premiseCodes);
 });
+
+final supermarketByIdsKeyProvider =
+FutureProvider.family<List<Supermarket>, String>((ref, premiseCodesKey) {
+  final premiseCodes = premiseCodesKey.split(',').where((code) => code.isNotEmpty).toList();
+  return ref.watch(supermarketRepositoryProvider).getByIds(premiseCodes);
+});

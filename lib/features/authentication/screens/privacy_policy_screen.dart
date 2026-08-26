@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/localization/app_strings.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/legal_strings.dart';
 
-class PrivacyPolicyScreen extends StatelessWidget {
+class PrivacyPolicyScreen extends ConsumerWidget {
   const PrivacyPolicyScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -15,8 +17,8 @@ class PrivacyPolicyScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primary,
         elevation: 0,
-        title: const Text(
-          "Privacy Policy",
+        title: Text(
+            ref.tr('privacy_policy')
         ),
       ),
 

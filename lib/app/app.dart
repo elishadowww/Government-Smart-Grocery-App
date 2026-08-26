@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:flutter_localizations/flutter_localizations.dart';
+import '../providers/locale_provider.dart';
 import '../core/services/database_service.dart';
 import '../core/widgets/app_error.dart';
 import '../core/widgets/app_loading.dart';
@@ -13,10 +14,23 @@ class SmartGroceryApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
+
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: appRouter,
+      locale: locale,
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('ms'), // Bahasa Melayu
+        Locale('zh'), // Chinese
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       builder: (context, child) {
         final dbInit = ref.watch(databaseInitProvider);
         return dbInit.when(
