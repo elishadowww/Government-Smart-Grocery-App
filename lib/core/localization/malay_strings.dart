@@ -262,5 +262,7 @@ class MalayStrings {
     'photo_updated': 'Gambar profil dikemas kini',
     'photo_removed': 'Gambar profil dipadamkan',
     'could_not_update_photo': 'Gagal mengemas kini gambar profil anda.',
+    'app_version': 'Versi',
+    'legal': 'UNDANG-UNDANG',
   };
 }

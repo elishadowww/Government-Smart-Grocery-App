@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/about/screens/about_screen.dart';
 import '../../features/authentication/repositories/auth_repositories.dart';
 import '../../features/authentication/screens/forgot_password_screen.dart';
 import '../../features/authentication/screens/intro_screen.dart';
@@ -165,6 +166,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+
+    GoRoute(
+      path: '/about',
+      builder: (context, state) => const AboutScreen(),
     ),
   ],
 );

@@ -262,5 +262,7 @@ class ChineseStrings {
     'photo_updated': '个人资料照片已更新',
     'photo_removed': '个人资料照片已移除',
     'could_not_update_photo': '无法更新您的个人资料照片。',
+    'app_version': '版本',
+    'legal': '法律信息',
   };
 }

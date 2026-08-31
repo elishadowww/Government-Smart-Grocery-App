@@ -4,12 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
-import '../../../core/widgets/custom_snackbar.dart';
 import '../../authentication/repositories/auth_repositories.dart';
 import '../../../core/localization/app_strings.dart';
 
-/// Navigation drawer (spec Fig 7.1.2). Only "About" remains out of this
-/// branch's scope and shows a placeholder instead of a dead route.
+/// Navigation drawer (spec Fig 7.1.2).
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
@@ -117,7 +115,10 @@ class AppDrawer extends ConsumerWidget {
                   _DrawerItem(
                     icon: Icons.info_outline,
                     label: ref.tr('about'),
-                    onTap: () => _comingSoon(context, ref),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push('/about');
+                    },
                   ),
                 ],
               ),
@@ -137,11 +138,6 @@ class AppDrawer extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _comingSoon(BuildContext context, WidgetRef ref) {
-    Navigator.of(context).pop();
-    showAppSnackBar(context, ref.tr('coming_soon'));
   }
 }
 

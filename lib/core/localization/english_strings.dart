@@ -262,5 +262,7 @@ class EnglishStrings {
     'photo_updated': 'Profile photo updated',
     'photo_removed': 'Profile photo removed',
     'could_not_update_photo': 'Could not update your profile photo.',
+    'app_version': 'Version',
+    'legal': 'LEGAL',
   };
 }
