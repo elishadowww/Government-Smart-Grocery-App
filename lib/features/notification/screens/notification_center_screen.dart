@@ -15,25 +15,14 @@ import '../../../providers/search_query_provider.dart';
 import '../../../core/localization/app_strings.dart';
 
 /// Notification Centre (spec §7.9): in-app only, no push. Populated by
-/// scanning saved products for price changes each time the screen opens.
-class NotificationCenterScreen extends ConsumerStatefulWidget {
+/// [priceAlertScanProvider], which scans saved products for price changes
+/// the first time any screen reads notification state this session (not
+/// only when this screen opens).
+class NotificationCenterScreen extends ConsumerWidget {
   const NotificationCenterScreen({super.key});
 
   @override
-  ConsumerState<NotificationCenterScreen> createState() => _NotificationCenterScreenState();
-}
-
-class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(notificationsControllerProvider).scanSavedProductsForPriceChanges();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(

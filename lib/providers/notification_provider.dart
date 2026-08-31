@@ -11,15 +11,27 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository();
 });
 
+/// Runs the saved-product price scan once per signed-in session (and again
+/// whenever the signed-in user changes), so a price change surfaces the
+/// first time anything reads notification state — not only after the user
+/// has opened the Notification Center screen.
+final priceAlertScanProvider = FutureProvider<void>((ref) async {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null) return;
+  await ref.read(notificationsControllerProvider).scanSavedProductsForPriceChanges();
+});
+
 final notificationsProvider = FutureProvider<List<AppNotification>>((ref) async {
   final uid = ref.watch(currentUidProvider);
   if (uid == null) return const [];
+  await ref.watch(priceAlertScanProvider.future);
   return ref.watch(notificationRepositoryProvider).getAll(uid);
 });
 
 final unreadNotificationCountProvider = FutureProvider<int>((ref) async {
   final uid = ref.watch(currentUidProvider);
   if (uid == null) return 0;
+  await ref.watch(priceAlertScanProvider.future);
   return ref.watch(notificationRepositoryProvider).unreadCount(uid);
 });
 
