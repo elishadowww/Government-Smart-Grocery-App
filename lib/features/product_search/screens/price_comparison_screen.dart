@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/app_empty.dart';
@@ -43,8 +42,10 @@ class _PriceComparisonScreenState extends ConsumerState<PriceComparisonScreen> {
       context,
       added ? ref.tr('added_to_cart') : ref.tr('please_try_again'),
       isError: !added,
-      actionLabel: added ? ref.tr('view') : null,
-      onAction: added ? () => context.push('/cart') : null,
+      actionLabel: added ? ref.tr('undo') : null,
+      onAction: added
+          ? () => ref.read(shoppingListControllerProvider).remove(widget.itemCode)
+          : null,
     );
   }
 

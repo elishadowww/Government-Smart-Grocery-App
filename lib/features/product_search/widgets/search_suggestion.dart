@@ -33,9 +33,13 @@ class RecentSearches extends ConsumerWidget {
             ),
             GestureDetector(
               onTap: onClearAll,
-              child: Text(
-                ref.tr('clear_all'),
-                style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                child: Text(
+                  ref.tr('clear_all'),
+                  style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ],

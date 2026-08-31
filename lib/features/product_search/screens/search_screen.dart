@@ -441,9 +441,9 @@ class _CategoryBrowse extends ConsumerWidget {
         );
       },
       loading: () => const SkeletonListLoader(),
-      error: (e, _) => AppEmptyState(
-        icon: Icons.search,
-        message: ref.tr('search_prompt'),
+      error: (e, _) => InlineError(
+        message: ref.tr('could_not_load_categories'),
+        onRetry: () => ref.invalidate(productCategoriesProvider),
       ),
     );
   }

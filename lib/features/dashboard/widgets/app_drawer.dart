@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/widgets/custom_dialog.dart';
 import '../../authentication/repositories/auth_repositories.dart';
 import '../../../core/localization/app_strings.dart';
 
@@ -130,7 +131,16 @@ class AppDrawer extends ConsumerWidget {
               color: AppColors.error,
               onTap: () async {
                 Navigator.of(context).pop();
-                await AuthRepository().logout();
+                final confirmed = await showConfirmDialog(
+                  context,
+                  title: ref.tr('logout_confirm_title'),
+                  message: ref.tr('logout_confirm_message'),
+                  confirmLabel: ref.tr('logout'),
+                  cancelLabel: ref.tr('cancel'),
+                );
+                if (confirmed == true) {
+                  await AuthRepository().logout();
+                }
               },
             ),
             const SizedBox(height: 8),

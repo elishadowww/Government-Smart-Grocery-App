@@ -75,15 +75,18 @@ class ProductCard extends StatelessWidget {
                             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                           ),
                         ),
-                        InkWell(
-                          onTap: onToggleSave,
-                          borderRadius: BorderRadius.circular(20),
-                          child: Padding(
-                            padding: const EdgeInsets.all(2),
-                            child: Icon(
-                              isSaved ? Icons.favorite : Icons.favorite_border,
-                              size: 20,
-                              color: isSaved ? AppColors.error : AppColors.grey,
+                        Tooltip(
+                          message: isSaved ? 'Remove from favourites' : 'Add to favourites',
+                          child: InkWell(
+                            onTap: onToggleSave,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2),
+                              child: Icon(
+                                isSaved ? Icons.favorite : Icons.favorite_border,
+                                size: 20,
+                                color: isSaved ? AppColors.error : AppColors.grey,
+                              ),
                             ),
                           ),
                         ),

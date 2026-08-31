@@ -18,7 +18,11 @@ class QuantitySelector extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _StepButton(icon: Icons.remove, onTap: () => onChanged(quantity - 1)),
+        _StepButton(
+          icon: Icons.remove,
+          tooltip: 'Decrease quantity',
+          onTap: () => onChanged(quantity - 1),
+        ),
         SizedBox(
           width: 28,
           child: Text(
@@ -27,16 +31,21 @@ class QuantitySelector extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
-        _StepButton(icon: Icons.add, onTap: () => onChanged(quantity + 1)),
+        _StepButton(
+          icon: Icons.add,
+          tooltip: 'Increase quantity',
+          onTap: () => onChanged(quantity + 1),
+        ),
       ],
     );
   }
 }
 
 class _StepButton extends StatelessWidget {
-  const _StepButton({required this.icon, required this.onTap});
+  const _StepButton({required this.icon, required this.tooltip, required this.onTap});
 
   final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
 
   @override
@@ -44,12 +53,16 @@ class _StepButton extends StatelessWidget {
     return Material(
       color: AppColors.surface,
       shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Icon(icon, size: 16, color: AppColors.primary),
+      child: Tooltip(
+        message: tooltip,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Center(child: Icon(icon, size: 16, color: AppColors.primary)),
+          ),
         ),
       ),
     );

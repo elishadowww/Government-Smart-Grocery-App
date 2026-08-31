@@ -43,6 +43,7 @@ class AppSearchBar extends StatelessWidget {
             if (value.text.isEmpty) return const SizedBox.shrink();
             return IconButton(
               icon: const Icon(Icons.close, size: 20, color: AppColors.grey),
+              tooltip: 'Clear search',
               onPressed: () {
                 controller.clear();
                 onChanged?.call('');

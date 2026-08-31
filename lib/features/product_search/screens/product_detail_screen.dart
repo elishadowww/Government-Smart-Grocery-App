@@ -101,6 +101,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               (isSavedAsync.value ?? false) ? Icons.favorite : Icons.favorite_border,
               color: (isSavedAsync.value ?? false) ? AppColors.error : null,
             ),
+            tooltip: (isSavedAsync.value ?? false)
+                ? ref.tr('remove_from_favourites')
+                : ref.tr('add_to_favourites'),
             onPressed: _toggleSave,
           ),
           const CartAppBarAction(),

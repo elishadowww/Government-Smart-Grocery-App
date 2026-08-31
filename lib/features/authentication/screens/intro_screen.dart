@@ -92,15 +92,19 @@ class IntroScreen extends ConsumerWidget {
 
                   const SizedBox(height: 20),
 
-                  GestureDetector(
-                    onTap: () async {
-                      await AuthRepository().signInAnonymously();
-                    },
-                    child: Text(
-                      ref.tr('continue_as_guest'),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                  SizedBox(
+                    height: 44,
+                    child: TextButton(
+                      onPressed: () async {
+                        await AuthRepository().signInAnonymously();
+                      },
+                      child: Text(
+                        ref.tr('continue_as_guest'),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ),

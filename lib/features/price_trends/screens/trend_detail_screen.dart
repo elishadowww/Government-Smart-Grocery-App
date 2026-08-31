@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/theme/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/widgets/app_loading.dart';
 import '../../../core/widgets/inline_error.dart';
 import '../../../providers/price_provider.dart';
@@ -18,19 +20,33 @@ class TrendDetailScreen extends ConsumerStatefulWidget {
 
   const TrendDetailScreen({super.key, required this.itemCode});
 
-  static const Color primaryGreen = Color(0xFF2E7D32);
-
   @override
   ConsumerState<TrendDetailScreen> createState() => _TrendDetailScreenState();
 }
 
 class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
   _TrendSort _sortBy = _TrendSort.date;
+  bool _ascending = false;
+  String? _selectedMonth;
+
+  static const List<String> _monthNames = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  static String _formatMonth(String ym) {
+    final year = ym.substring(0, 4);
+    final month = int.parse(ym.substring(5, 7));
+    return '${_monthNames[month - 1]} $year';
+  }
 
   @override
   Widget build(BuildContext context) {
     final productAsync = ref.watch(productByIdProvider(widget.itemCode));
-    final historyAsync = ref.watch(priceHistoryProvider(PriceHistoryQuery(itemCode: widget.itemCode)));
+    final monthsAsync = ref.watch(priceHistoryMonthsProvider(widget.itemCode));
+    final historyAsync = ref.watch(priceHistoryProvider(
+      PriceHistoryQuery(itemCode: widget.itemCode, month: _selectedMonth),
+    ));
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -38,12 +54,13 @@ class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: TrendDetailScreen.primaryGreen),
+          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.primary),
+          tooltip: ref.tr('back'),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'Price Trends',
-          style: TextStyle(
+        title: Text(
+          ref.tr('price_trends'),
+          style: const TextStyle(
             color: Color(0xFF333333),
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -53,15 +70,17 @@ class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
       body: productAsync.when(
         loading: () => const AppLoading(),
         error: (err, _) => InlineError(
-          message: 'Could not load product details.',
+          message: ref.tr('could_not_load_product_details'),
           onRetry: () => ref.invalidate(productByIdProvider(widget.itemCode)),
         ),
         data: (product) {
           return historyAsync.when(
             loading: () => const AppLoading(),
             error: (err, _) => InlineError(
-              message: 'Could not load price history.',
-              onRetry: () => ref.invalidate(priceHistoryProvider(PriceHistoryQuery(itemCode: widget.itemCode))),
+              message: ref.tr('could_not_load_price_history'),
+              onRetry: () => ref.invalidate(priceHistoryProvider(
+                PriceHistoryQuery(itemCode: widget.itemCode, month: _selectedMonth),
+              )),
             ),
             data: (historyPrices) {
               final premiseCodesList = historyPrices
@@ -77,7 +96,7 @@ class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
               return storesAsync.when(
                 loading: () => const AppLoading(),
                 error: (err, _) => InlineError(
-                  message: 'Could not load store details.',
+                  message: ref.tr('could_not_load_store_details'),
                   onRetry: () => ref.invalidate(supermarketByIdsKeyProvider(premiseCodesKey)),
                 ),
                 data: (stores) {
@@ -88,7 +107,7 @@ class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
 
                   final historyMaps = historyPrices.map((p) {
                     final premiseKey = p.premiseCode.toString().trim();
-                    final storeName = storeByCode[premiseKey] ?? 'Supermarket';
+                    final storeName = storeByCode[premiseKey] ?? ref.tr('supermarket');
 
                     return {
                       'date': p.date,
@@ -102,32 +121,37 @@ class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
                   double high = 0.0;
                   double avg = 0.0;
 
-                  if (historyPrices.isNotEmpty) {
-                    final prices = historyPrices.map((e) => e.price).toList();
-                    lowest = prices.reduce((a, b) => a < b ? a : b);
-                    high = prices.reduce((a, b) => a > b ? a : b);
-                    avg = prices.reduce((a, b) => a + b) / prices.length;
+                  final validPrices = historyPrices
+                      .map((e) => e.price)
+                      .where((p) => p > 0)
+                      .toList();
+                  final hasStats = validPrices.isNotEmpty;
+
+                  if (hasStats) {
+                    lowest = validPrices.reduce((a, b) => a < b ? a : b);
+                    high = validPrices.reduce((a, b) => a > b ? a : b);
+                    avg = validPrices.reduce((a, b) => a + b) / validPrices.length;
                   }
 
-                  final productName = product?.name ?? 'Item Code: ${widget.itemCode}';
+                  final productName =
+                      product?.name ?? '${ref.tr('item_code_label')}: ${widget.itemCode}';
 
                   // Sort history records specifically for HistoryTable presentation
                   final sortedHistoryMaps = List<Map<String, dynamic>>.from(historyMaps);
-                  switch (_sortBy) {
-                    case _TrendSort.date:
-                      sortedHistoryMaps.sort((a, b) {
+                  int compare(Map<String, dynamic> a, Map<String, dynamic> b) {
+                    switch (_sortBy) {
+                      case _TrendSort.date:
                         final dateA = DateTime.tryParse(a['date'].toString()) ?? DateTime(1970);
                         final dateB = DateTime.tryParse(b['date'].toString()) ?? DateTime(1970);
-                        return dateB.compareTo(dateA); // Newest first
-                      });
-                      break;
-                    case _TrendSort.price:
-                      sortedHistoryMaps.sort((a, b) => (a['price'] as num).compareTo(b['price'] as num));
-                      break;
-                    case _TrendSort.alphabetical:
-                      sortedHistoryMaps.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
-                      break;
+                        return dateA.compareTo(dateB);
+                      case _TrendSort.price:
+                        return (a['price'] as num).compareTo(b['price'] as num);
+                      case _TrendSort.alphabetical:
+                        return (a['name'] as String).compareTo(b['name'] as String);
+                    }
                   }
+
+                  sortedHistoryMaps.sort((a, b) => _ascending ? compare(a, b) : compare(b, a));
 
                   return SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -148,24 +172,45 @@ class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
                             children: [
                               TrendChart(records: historyMaps),
                               const SizedBox(height: 16),
-                              StatisticPanel(lowest: lowest, avg: avg, high: high),
+                              StatisticPanel(lowest: lowest, avg: avg, high: high, hasData: hasStats),
                             ],
                           ),
                         ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            const Text('Sort:', style: TextStyle(color: Colors.grey)),
+                            Text(ref.tr('month'), style: const TextStyle(color: Colors.grey)),
+                            const SizedBox(width: 8),
+                            DropdownButton<String?>(
+                              value: _selectedMonth,
+                              underline: const SizedBox.shrink(),
+                              items: [
+                                DropdownMenuItem<String?>(value: null, child: Text(ref.tr('all'))),
+                                ...(monthsAsync.value ?? const <String>[]).map(
+                                  (ym) => DropdownMenuItem<String?>(
+                                    value: ym,
+                                    child: Text(_formatMonth(ym)),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (value) => setState(() => _selectedMonth = value),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Text(ref.tr('sort'), style: const TextStyle(color: Colors.grey)),
                             const SizedBox(width: 8),
                             DropdownButton<_TrendSort>(
                               value: _sortBy,
                               underline: const SizedBox.shrink(),
-                              items: const [
-                                DropdownMenuItem(value: _TrendSort.date, child: Text('Date')),
-                                DropdownMenuItem(value: _TrendSort.price, child: Text('Price')),
+                              items: [
+                                DropdownMenuItem(value: _TrendSort.date, child: Text(ref.tr('date'))),
+                                DropdownMenuItem(value: _TrendSort.price, child: Text(ref.tr('price'))),
                                 DropdownMenuItem(
                                   value: _TrendSort.alphabetical,
-                                  child: Text('Alphabetical'),
+                                  child: Text(ref.tr('alphabetical')),
                                 ),
                               ],
                               onChanged: (value) {
@@ -173,6 +218,17 @@ class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
                                   setState(() => _sortBy = value);
                                 }
                               },
+                            ),
+                            const SizedBox(width: 4),
+                            IconButton(
+                              icon: Icon(
+                                _ascending
+                                    ? Icons.arrow_upward_rounded
+                                    : Icons.arrow_downward_rounded,
+                                color: AppColors.primary,
+                              ),
+                              tooltip: _ascending ? 'Ascending' : 'Descending',
+                              onPressed: () => setState(() => _ascending = !_ascending),
                             ),
                           ],
                         ),
@@ -200,12 +256,12 @@ class _TrendDetailScreenState extends ConsumerState<TrendDetailScreen> {
       child: TextField(
         readOnly: true,
         onTap: () => context.pop(),
-        decoration: const InputDecoration(
-          hintText: 'Search a product...',
-          hintStyle: TextStyle(color: Colors.grey),
-          prefixIcon: Icon(Icons.search, color: Colors.grey),
+        decoration: InputDecoration(
+          hintText: ref.tr('search_a_product'),
+          hintStyle: const TextStyle(color: Colors.grey),
+          prefixIcon: const Icon(Icons.search, color: Colors.grey),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
         ),
       ),
     );

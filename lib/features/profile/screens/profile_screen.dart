@@ -88,6 +88,15 @@ class ProfileScreen extends ConsumerWidget {
                   title: Text(ref.tr('remove_photo'), style: const TextStyle(color: AppColors.error)),
                   onTap: () async {
                     Navigator.of(sheetContext).pop();
+                    final confirmed = await showConfirmDialog(
+                      context,
+                      title: ref.tr('remove_photo'),
+                      message: ref.tr('remove_photo_confirm_message'),
+                      confirmLabel: ref.tr('remove_photo'),
+                      cancelLabel: ref.tr('cancel'),
+                    );
+                    if (confirmed != true) return;
+                    if (!context.mounted) return;
                     final removed = await ref.read(profilePhotoControllerProvider).removePhoto();
                     if (!context.mounted) return;
                     if (removed) showAppSnackBar(context, ref.tr('photo_removed'));

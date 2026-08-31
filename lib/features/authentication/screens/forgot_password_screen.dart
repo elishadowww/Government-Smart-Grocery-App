@@ -103,6 +103,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           alignment: Alignment.centerLeft,
                           child: IconButton(
                             onPressed: () => context.pop(),
+                            tooltip: ref.tr('back'),
                             icon: const Icon(
                               Icons.arrow_back_ios_new,
                               color: AppColors.primary,

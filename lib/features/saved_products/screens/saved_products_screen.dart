@@ -80,6 +80,7 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
           if (isRegistered)
             IconButton(
               icon: const Icon(Icons.more_vert),
+              tooltip: ref.tr('clear_all_favourites'),
               onPressed: () async {
                 final confirmed = await showConfirmDialog(
                   context,
@@ -203,11 +204,15 @@ class _SavedProductsScreenState extends ConsumerState<SavedProductsScreen> {
                               style: const TextStyle(fontWeight: FontWeight.w600)),
                           GestureDetector(
                             onTap: () => setState(() => _editing = !_editing),
-                            child: Text(
-                              _editing ? ref.tr('done') : ref.tr('edit'),
-                              style: const TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
+                            behavior: HitTestBehavior.opaque,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                              child: Text(
+                                _editing ? ref.tr('done') : ref.tr('edit'),
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -325,6 +330,7 @@ class _EditableRow extends ConsumerWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.remove_circle, color: AppColors.error),
+            tooltip: ref.tr('remove_from_favourites'),
             onPressed: onRemove,
           ),
           Expanded(

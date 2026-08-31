@@ -63,10 +63,13 @@ class SearchBarWidget extends ConsumerWidget {
               color: Colors.white,
               elevation: 2,
               borderRadius: BorderRadius.circular(18),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(18),
-                onTap: onFilterPressed,
-                child: const Icon(Icons.tune),
+              child: Tooltip(
+                message: ref.tr('filter'),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: onFilterPressed,
+                  child: const Icon(Icons.tune),
+                ),
               ),
             ),
           ),

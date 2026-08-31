@@ -1,32 +1,42 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
+import '../../../app/theme/app_colors.dart';
+
 class TrendChart extends StatelessWidget {
   final List<Map<String, dynamic>> records;
 
   const TrendChart({super.key, required this.records});
 
-  static const Color primaryGreen = Color(0xFF2E7D32);
-
   @override
   Widget build(BuildContext context) {
     List<double> prices = [];
-    final List<String> monthLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J'];
+    List<String> monthLabels = [];
 
-    if (records.isNotEmpty) {
-      final mapPrices = records
-          .map((r) => (r['price'] as num?)?.toDouble() ?? 0.0)
-          .where((p) => p > 0)
-          .toList();
+    final validRecords = records
+        .where((r) => ((r['price'] as num?) ?? 0) > 0)
+        .toList();
 
-      if (mapPrices.length >= 2) {
-        prices = mapPrices.take(7).toList();
-      }
+    if (validRecords.length >= 2) {
+      final sample = validRecords.take(7).toList();
+      prices = sample.map((r) => (r['price'] as num).toDouble()).toList();
+      monthLabels = sample.map((r) {
+        final date = DateTime.tryParse(r['date'].toString());
+        return date == null ? '' : '${date.day}/${date.month}';
+      }).toList();
     }
 
-    // Default sample data fallback if records are sparse
     if (prices.length < 2) {
-      prices = [8.5, 10.0, 10.0, 12.0, 10.0, 8.8, 9.2];
+      return const SizedBox(
+        height: 180,
+        child: Center(
+          child: Text(
+            'Not enough price data to show a trend',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: Color(0xFF888888)),
+          ),
+        ),
+      );
     }
 
     final double minP = prices.reduce(min);
@@ -84,7 +94,7 @@ class TrendChart extends StatelessWidget {
                 minY: minY,
                 maxY: maxY,
                 monthLabels: monthLabels,
-                primaryGreen: primaryGreen,
+                primaryGreen: AppColors.primary,
               ),
             ),
           ),

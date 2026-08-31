@@ -8,6 +8,7 @@ import '../../../core/widgets/app_search_bar.dart';
 import '../../../core/widgets/app_skeleton.dart';
 import '../../../core/widgets/budget_card.dart';
 import '../../../core/widgets/cart_app_bar_action.dart';
+import '../../../core/widgets/inline_error.dart';
 import '../../../providers/nearby_supermarket_provider.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../providers/price_provider.dart';
@@ -39,11 +40,13 @@ class DashboardScreen extends ConsumerWidget {
               label: Text('$unreadCount'),
               child: const Icon(Icons.notifications_none),
             ),
+            tooltip: ref.tr('notifications'),
             onPressed: () => context.push('/notifications'),
           ),
           const CartAppBarAction(),
           IconButton(
             icon: const Icon(Icons.person_outline),
+            tooltip: ref.tr('profile'),
             onPressed: () => context.push('/profile'),
           ),
         ],
@@ -107,7 +110,11 @@ class DashboardScreen extends ConsumerWidget {
               Text(ref.tr('price_alerts'), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
               GestureDetector(
                 onTap: () => context.push('/notifications'),
-                child: Text( ref.tr('view_all'), style: TextStyle(color: AppColors.primary)),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  child: Text(ref.tr('view_all'), style: TextStyle(color: AppColors.primary)),
+                ),
               ),
             ],
           ),
@@ -214,7 +221,26 @@ class _NearbyCheapestSupermarketCard extends ConsumerWidget {
 class _PriceAlertsPreview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifications = ref.watch(notificationsProvider).value ?? const [];
+    final notificationsAsync = ref.watch(notificationsProvider);
+
+    if (notificationsAsync.isLoading) {
+      return const Column(
+        children: [
+          SkeletonBox(height: 44, width: double.infinity),
+          SizedBox(height: 8),
+          SkeletonBox(height: 44, width: double.infinity),
+        ],
+      );
+    }
+
+    if (notificationsAsync.hasError) {
+      return InlineError(
+        message: ref.tr('could_not_load_notifications'),
+        onRetry: () => ref.invalidate(notificationsProvider),
+      );
+    }
+
+    final notifications = notificationsAsync.value ?? const [];
 
     if (notifications.isEmpty) {
       return AppEmptyState(icon: Icons.notifications_none, message: ref.tr('no_price_alerts'),);
@@ -256,6 +282,24 @@ class _RecentProducts extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(recentProductsProvider);
+
+    if (productsAsync.isLoading) {
+      return const Column(
+        children: [
+          SkeletonBox(height: 44, width: double.infinity),
+          SizedBox(height: 8),
+          SkeletonBox(height: 44, width: double.infinity),
+        ],
+      );
+    }
+
+    if (productsAsync.hasError) {
+      return InlineError(
+        message: ref.tr('could_not_load_products'),
+        onRetry: () => ref.invalidate(recentProductsProvider),
+      );
+    }
+
     final products = productsAsync.value ?? const [];
 
     if (products.isEmpty) {

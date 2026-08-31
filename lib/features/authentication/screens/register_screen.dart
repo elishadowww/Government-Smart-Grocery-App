@@ -146,6 +146,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                     ),
+                    tooltip: obscurePassword ? ref.tr('show_password') : ref.tr('hide_password'),
                     onPressed: () {
                       setState(() {
                         obscurePassword = !obscurePassword;
@@ -183,7 +184,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 },
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 8),
+              _buildPasswordChecklist(),
+              const SizedBox(height: 10),
 
               TextFormField(
                 controller: confirmPasswordController,
@@ -200,6 +203,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                     ),
+                    tooltip: obscureConfirmPassword
+                        ? ref.tr('show_password')
+                        : ref.tr('hide_password'),
                     onPressed: () {
                       setState(() {
                         obscureConfirmPassword =
@@ -461,6 +467,67 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordChecklist() {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: passwordController,
+      builder: (context, value, _) {
+        final password = value.text;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              ref.tr('password_requirements'),
+              style: const TextStyle(fontSize: 12, color: AppColors.grey, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            _PasswordRule(
+              met: password.length >= 8,
+              label: ref.tr('password_rule_length'),
+            ),
+            _PasswordRule(
+              met: RegExp(r'[A-Z]').hasMatch(password),
+              label: ref.tr('password_rule_uppercase'),
+            ),
+            _PasswordRule(
+              met: RegExp(r'[a-z]').hasMatch(password),
+              label: ref.tr('password_rule_lowercase'),
+            ),
+            _PasswordRule(
+              met: RegExp(r'\d').hasMatch(password),
+              label: ref.tr('password_rule_number'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _PasswordRule extends StatelessWidget {
+  const _PasswordRule({required this.met, required this.label});
+
+  final bool met;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = met ? AppColors.primary : AppColors.grey;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Icon(
+            met ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 14,
+            color: color,
+          ),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(fontSize: 12, color: color)),
+        ],
       ),
     );
   }

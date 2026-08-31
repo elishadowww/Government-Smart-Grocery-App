@@ -76,6 +76,7 @@ class CartScreen extends ConsumerWidget {
           if ((entriesAsync.value ?? const []).isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_outline),
+              tooltip: ref.tr('clear_cart'),
               onPressed: () async {
                 final confirmed = await showConfirmDialog(
                   context,

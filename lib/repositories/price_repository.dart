@@ -58,13 +58,17 @@ class PriceRepository {
   }
 
   /// Historical prices for [itemCode], optionally scoped to one
-  /// [premiseCode], ordered oldest to newest. Powers Module 4 (price
-  /// trends).
+  /// [premiseCode] and/or one calendar [month] (format `'YYYY-MM'`),
+  /// newest first. Powers Module 4 (price trends).
+  ///
+  /// [limit] is only a safety cap for the unscoped "all months" case — pass
+  /// null (the default) to fetch everything matching the filters, which is
+  /// what callers scoping to a single month want.
   Future<List<Price>> getHistory({
     required String itemCode,
     String? premiseCode,
-    DateTime? since,
-    int limit = 200,
+    String? month,
+    int? limit,
   }) async {
     final db = await _databaseService.database;
     final where = StringBuffer('${PriceColumns.itemCode} = ?');
@@ -74,19 +78,37 @@ class PriceRepository {
       where.write(' AND ${PriceColumns.premiseCode} = ?');
       args.add(premiseCode);
     }
-    if (since != null) {
-      where.write(' AND ${PriceColumns.date} >= ?');
-      args.add(_isoDate(since));
+    if (month != null) {
+      where.write(' AND ${PriceColumns.date} >= ? AND ${PriceColumns.date} < ?');
+      args.add('$month-01');
+      args.add(_nextMonthStart(month));
     }
 
     final rows = await db.query(
       DatabaseTables.prices,
       where: where.toString(),
       whereArgs: args,
-      orderBy: PriceColumns.date,
+      orderBy: '${PriceColumns.date} DESC',
       limit: limit,
     );
     return rows.map(Price.fromMap).toList();
+  }
+
+  /// Calendar months (format `'YYYY-MM'`, newest first) for which
+  /// [itemCode] has any price history — backs the price-trend screen's
+  /// month picker.
+  Future<List<String>> getAvailableMonths(String itemCode) async {
+    final db = await _databaseService.database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT DISTINCT substr(${PriceColumns.date}, 1, 7) AS ym
+      FROM ${DatabaseTables.prices}
+      WHERE ${PriceColumns.itemCode} = ?
+      ORDER BY ym DESC
+      ''',
+      [itemCode],
+    );
+    return rows.map((row) => row['ym'] as String).toList();
   }
 
   /// Cheapest current price for each of [itemCodes], one row per item —
@@ -122,10 +144,15 @@ class PriceRepository {
     return result;
   }
 
-  static String _isoDate(DateTime date) {
-    final y = date.year.toString().padLeft(4, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    final d = date.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
+  /// First day of the month after [month] (format `'YYYY-MM'`), as an ISO
+  /// date string — the exclusive upper bound for a "within this month"
+  /// range query.
+  static String _nextMonthStart(String month) {
+    final year = int.parse(month.substring(0, 4));
+    final monthNum = int.parse(month.substring(5, 7));
+    final next = monthNum == 12 ? DateTime(year + 1, 1) : DateTime(year, monthNum + 1);
+    final y = next.year.toString().padLeft(4, '0');
+    final m = next.month.toString().padLeft(2, '0');
+    return '$y-$m-01';
   }
 }

@@ -83,9 +83,13 @@ class CartItemTile extends ConsumerWidget {
                   const SizedBox(height: 4),
                   GestureDetector(
                     onTap: onRemove,
-                    child: Text(
-                      ref.tr('remove'),
-                      style: TextStyle(fontSize: 11, color: AppColors.error),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                      child: Text(
+                        ref.tr('remove'),
+                        style: TextStyle(fontSize: 11, color: AppColors.error),
+                      ),
                     ),
                   ),
                 ],

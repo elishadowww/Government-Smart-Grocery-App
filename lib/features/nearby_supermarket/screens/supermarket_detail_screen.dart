@@ -6,6 +6,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../../providers/price_provider.dart';
 import '../../../providers/supermarket_provider.dart';
 import '../models/supermarket_model.dart';
+import 'store_catalog_screen.dart';
 
 /// Products & prices shown here are matched from this Places result to a
 /// PriceCatcher premise by [SupermarketMatcher] — the two data sources
@@ -176,6 +177,7 @@ class SupermarketDetailScreen extends ConsumerWidget {
                     : _StoreCatalogSection(
                         premiseCode: match.supermarket.premiseCode,
                         isApproximateMatch: match.isApproximate,
+                        storeName: supermarket.name,
                       ),
                 loading: () => const Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
@@ -252,10 +254,12 @@ class _StoreCatalogSection extends ConsumerWidget {
   const _StoreCatalogSection({
     required this.premiseCode,
     required this.isApproximateMatch,
+    required this.storeName,
   });
 
   final String premiseCode;
   final bool isApproximateMatch;
+  final String storeName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -285,15 +289,26 @@ class _StoreCatalogSection extends ConsumerWidget {
                 ),
               ),
             for (final entry in shown) ...[
-              _CatalogRow(entry: entry),
+              CatalogRow(entry: entry),
               const SizedBox(height: 10),
             ],
             if (entries.length > shown.length)
-              Text(
-                ref.tr('showing_products_count')
-                    .replaceAll('{shown}', '${shown.length}')
-                    .replaceAll('{total}', '${entries.length}'),
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => StoreCatalogScreen(
+                        premiseCode: premiseCode,
+                        storeName: storeName,
+                        isApproximateMatch: isApproximateMatch,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    ref.tr('view_all_products').replaceAll('{total}', '${entries.length}'),
+                  ),
+                ),
               ),
           ],
         );
@@ -311,8 +326,8 @@ class _StoreCatalogSection extends ConsumerWidget {
   }
 }
 
-class _CatalogRow extends StatelessWidget {
-  const _CatalogRow({required this.entry});
+class CatalogRow extends StatelessWidget {
+  const CatalogRow({super.key, required this.entry});
 
   final StoreCatalogEntry entry;
 

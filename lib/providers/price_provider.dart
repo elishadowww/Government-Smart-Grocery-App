@@ -77,29 +77,44 @@ final latestPricesForItemProvider =
 /// Args bundle for [priceHistoryProvider], since `.family` only takes one
 /// parameter.
 class PriceHistoryQuery {
-  const PriceHistoryQuery({required this.itemCode, this.premiseCode});
+  const PriceHistoryQuery({required this.itemCode, this.premiseCode, this.month});
 
   final String itemCode;
   final String? premiseCode;
+
+  /// Calendar month to scope to, format `'YYYY-MM'`. Null means all months.
+  final String? month;
 
   @override
   bool operator ==(Object other) =>
       other is PriceHistoryQuery &&
       other.itemCode == itemCode &&
-      other.premiseCode == premiseCode;
+      other.premiseCode == premiseCode &&
+      other.month == month;
 
   @override
-  int get hashCode => Object.hash(itemCode, premiseCode);
+  int get hashCode => Object.hash(itemCode, premiseCode, month);
 }
 
-/// Historical prices for a product (optionally scoped to one supermarket) —
-/// backs Module 4's price-trend chart.
+/// Historical prices for a product (optionally scoped to one supermarket
+/// and/or one month) — backs Module 4's price-trend chart. Unscoped by
+/// month, results are capped to a safety limit; scoping to a single month
+/// returns everything in it.
 final priceHistoryProvider =
     FutureProvider.family<List<Price>, PriceHistoryQuery>((ref, query) {
   return ref.watch(priceRepositoryProvider).getHistory(
         itemCode: query.itemCode,
         premiseCode: query.premiseCode,
+        month: query.month,
+        limit: query.month == null ? 500 : null,
       );
+});
+
+/// Calendar months (newest first) with price history for [itemCode] —
+/// backs the price-trend screen's month picker.
+final priceHistoryMonthsProvider =
+    FutureProvider.family<List<String>, String>((ref, itemCode) {
+  return ref.watch(priceRepositoryProvider).getAvailableMonths(itemCode);
 });
 
 /// Cheapest current price per item, for a batch of items — backs the

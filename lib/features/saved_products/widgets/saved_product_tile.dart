@@ -99,12 +99,15 @@ class SavedProductTile extends ConsumerWidget {
               ),
               Column(
                 children: [
-                  InkWell(
-                    onTap: onUnsave,
-                    borderRadius: BorderRadius.circular(20),
-                    child: const Padding(
-                      padding: EdgeInsets.all(4),
-                      child: Icon(Icons.favorite, color: AppColors.error, size: 20),
+                  Tooltip(
+                    message: ref.tr('remove_from_favourites'),
+                    child: InkWell(
+                      onTap: onUnsave,
+                      borderRadius: BorderRadius.circular(20),
+                      child: const Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(Icons.favorite, color: AppColors.error, size: 20),
+                      ),
                     ),
                   ),
                   PopupMenuButton<String>(

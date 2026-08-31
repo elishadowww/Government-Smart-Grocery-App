@@ -244,6 +244,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                     ),
+                    tooltip: _obscurePassword ? ref.tr('show_password') : ref.tr('hide_password'),
                     onPressed: () {
                       setState(() {
                         _obscurePassword = !_obscurePassword;
@@ -263,12 +264,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
                   onTap: () => context.push("/forgot"),
-
-                  child: Text(
-                    ref.tr('forgot_password_question'),
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 13,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                    child: Text(
+                      ref.tr('forgot_password_question'),
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
