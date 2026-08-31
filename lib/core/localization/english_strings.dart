@@ -134,6 +134,8 @@ class EnglishStrings {
     'turn_on_location': 'Turn On Location',
     'grant_permission': 'Grant Permission',
     'retry': 'Retry',
+    'no_internet_title': 'No Internet Connection',
+    'no_internet_message': "You're offline. Please check your connection and try again.",
     'all': 'All',
     'grocery': 'Grocery',
     'hypermarket': 'Hypermarket',

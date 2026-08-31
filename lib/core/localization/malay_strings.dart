@@ -134,6 +134,8 @@ class MalayStrings {
     'turn_on_location': 'Hidupkan Lokasi',
     'grant_permission': 'Berikan Kebenaran',
     'retry': 'Cuba Lagi',
+    'no_internet_title': 'Tiada Sambungan Internet',
+    'no_internet_message': 'Anda sedang luar talian. Sila semak sambungan anda dan cuba lagi.',
     'all': 'Semua',
     'grocery': 'Barangan Runcit',
     'hypermarket': 'Pasar Raya Besar',

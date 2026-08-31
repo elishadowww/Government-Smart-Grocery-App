@@ -134,6 +134,8 @@ class ChineseStrings {
     'turn_on_location': '开启定位',
     'grant_permission': '授予权限',
     'retry': '重试',
+    'no_internet_title': '无网络连接',
+    'no_internet_message': '您目前处于离线状态。请检查您的网络连接后重试。',
     'all': '全部',
     'grocery': '杂货',
     'hypermarket': '大型超市',
