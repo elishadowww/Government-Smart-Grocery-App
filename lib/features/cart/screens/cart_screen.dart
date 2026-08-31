@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_skeleton.dart';
 import '../../../core/widgets/custom_dialog.dart';
@@ -12,11 +13,9 @@ import '../../../core/widgets/inline_error.dart';
 import '../../../providers/shopping_provider.dart';
 import '../widgets/cart_item_tile.dart';
 
-/// Cart screen (spec §7.5, simplified: no "Complete Shopping" archive flow
-/// — that's the rest of Module 3, out of scope here). Reachable from the
-/// persistent cart icon in the app bar, the Dashboard's "Cart" quick
-/// action, the nav drawer, and a "View" action on the "Added to cart"
-/// snackbar.
+/// Cart screen (spec §7.5). Reachable from the persistent cart icon in the
+/// app bar, the Dashboard's "Cart" quick action, the nav drawer, and a
+/// "View" action on the "Added to cart" snackbar.
 ///
 /// Items are grouped by the store the user chose for each one (spec-driven
 /// addition: Add to Cart now asks which store, rather than assuming
@@ -42,6 +41,24 @@ class CartScreen extends ConsumerWidget {
           ? () => ref.read(shoppingListControllerProvider).restore(itemCode, premiseCode, quantity)
           : null,
     );
+  }
+
+  /// Finishes the shopping trip: confirms, then clears the cart. There's no
+  /// purchase-history archive to write to (that's the rest of Module 3),
+  /// so "completing" a trip is just closing out the cart it was built in.
+  Future<void> _completeShopping(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: ref.tr('complete_shopping'),
+      message: ref.tr('complete_shopping_message'),
+      confirmLabel: ref.tr('complete_shopping'),
+    );
+    if (confirmed != true) return;
+
+    await ref.read(shoppingListControllerProvider).clearAll();
+    if (!context.mounted) return;
+
+    showAppSnackBar(context, ref.tr('shopping_completed'));
   }
 
   @override
@@ -131,7 +148,10 @@ class CartScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              _TotalBar(total: total),
+              _TotalBar(
+                total: total,
+                onCompleteShopping: () => _completeShopping(context, ref),
+              ),
             ],
           );
         },
@@ -282,9 +302,10 @@ class _CheapestStoreCard extends ConsumerWidget {
 }
 
 class _TotalBar extends ConsumerWidget {
-  const _TotalBar({required this.total});
+  const _TotalBar({required this.total, required this.onCompleteShopping});
 
   final double total;
+  final VoidCallback onCompleteShopping;
 
   @override
   Widget build(BuildContext context,WidgetRef ref) {
@@ -295,13 +316,24 @@ class _TotalBar extends ConsumerWidget {
         color: AppColors.white,
         border: Border(top: BorderSide(color: AppColors.divider)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(ref.tr('total_cost'), style: TextStyle(fontSize: 15, color: AppColors.grey)),
-          Text(
-            'RM${total.toStringAsFixed(2)}',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(ref.tr('total_cost'), style: TextStyle(fontSize: 15, color: AppColors.grey)),
+              Text(
+                'RM${total.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          AppButton(
+            label: ref.tr('complete_shopping'),
+            icon: Icons.check_circle_outline,
+            onPressed: onCompleteShopping,
           ),
         ],
       ),
