@@ -21,7 +21,10 @@ import '../widgets/cart_item_tile.dart';
 /// addition: Add to Cart now asks which store, rather than assuming
 /// cheapest). A "Cheapest Single Store" card compares the total of buying
 /// everything from just one store, scoped to the handful of stores already
-/// touched by the cart — not a nationwide scan.
+/// touched by the cart — not a nationwide scan. A "Mixed-Store Total" card
+/// (spec §7.5) recommends buying each item from whichever store has the
+/// cheapest price for it, when that per-item optimization actually beats
+/// the best single-store total.
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
@@ -120,6 +123,7 @@ class CartScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   children: [
                     const _CheapestStoreCard(),
+                    const _MixedStoreTotalCard(),
                     for (final key in groupOrder) ...[
                       _StoreGroupHeader(
                         storeName: groupStoreName[key]!,
@@ -295,6 +299,66 @@ class _CheapestStoreCard extends ConsumerWidget {
                 ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Spec §7.5's "Mixed-Store Total": recommends buying each cart item from
+/// whichever store has the cheapest price for it, shown only when that
+/// per-item optimization actually beats the best single-store total.
+class _MixedStoreTotalCard extends ConsumerWidget {
+  const _MixedStoreTotalCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mixed = ref.watch(mixedStoreTotalProvider).value;
+    if (mixed == null) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.call_split, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                ref.tr('mixed_store_total'),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            ref
+                .tr('mixed_store_total_subtitle')
+                .replaceAll('{count}', '${mixed.storeCount}'),
+            style: const TextStyle(fontSize: 12, color: AppColors.grey),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                ref.tr('mixed_store_savings').replaceAll('{amount}', mixed.savings.toStringAsFixed(2)),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
+              ),
+              Text(
+                'RM${mixed.total.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+            ],
+          ),
         ],
       ),
     );

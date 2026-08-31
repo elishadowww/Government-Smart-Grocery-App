@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/price.dart';
 import '../models/product.dart';
+import '../repositories/price_repository.dart';
 import '../repositories/shopping_repository.dart';
 import 'current_user_provider.dart';
 import 'price_provider.dart';
@@ -151,26 +152,114 @@ final singleStoreTotalsProvider = FutureProvider<List<StoreTotalOption>>((ref) a
 
   final options = <StoreTotalOption>[];
   for (final premiseCode in candidatePremiseCodes) {
-    var total = 0.0;
-    var missing = 0;
-    for (final entry in entries) {
-      final price = await priceRepo.getLatestPrice(entry.product.itemCode, premiseCode);
-      if (price == null) {
-        missing++;
-        continue;
-      }
-      total += price.price * entry.quantity;
-    }
+    final result = await _storeTotalFor(premiseCode, entries, priceRepo);
     options.add(StoreTotalOption(
       premiseCode: premiseCode,
       storeName: storeByCode[premiseCode]?.name ?? premiseCode,
-      total: total,
-      missingItemCount: missing,
+      total: result.total,
+      missingItemCount: result.missingItemCount,
     ));
   }
 
   options.sort((a, b) => a.total.compareTo(b.total));
   return options;
+});
+
+/// What buying every cart item from a single [premiseCode] would cost —
+/// shared by [singleStoreTotalsProvider] (candidate stores already touched
+/// by the cart) and [mixedStoreTotalProvider] (which needs the same
+/// per-store total as its "beat this" baseline).
+Future<({double total, int missingItemCount})> _storeTotalFor(
+  String premiseCode,
+  List<ShoppingListEntry> entries,
+  PriceRepository priceRepo,
+) async {
+  var total = 0.0;
+  var missing = 0;
+  for (final entry in entries) {
+    final price = await priceRepo.getLatestPrice(entry.product.itemCode, premiseCode);
+    if (price == null) {
+      missing++;
+      continue;
+    }
+    total += price.price * entry.quantity;
+  }
+  return (total: total, missingItemCount: missing);
+}
+
+/// The cost of buying each cart item from whichever store currently has the
+/// cheapest price for that specific item, plus how much it saves versus the
+/// best single-store total — spec §7.5's "Mixed-Store Total": "recommends
+/// the cheapest supermarket per item when it beats a single-store total."
+class MixedStoreTotal {
+  const MixedStoreTotal({
+    required this.total,
+    required this.missingItemCount,
+    required this.storeCount,
+    required this.savings,
+  });
+
+  final double total;
+  final int missingItemCount;
+  final int storeCount;
+  final double savings;
+}
+
+/// Per-item cheapest-store optimization for the whole cart, scanning every
+/// store nationwide for each item (via [PriceRepository.getCheapestPrices])
+/// rather than just the stores already touched by the cart — unlike
+/// [singleStoreTotalsProvider], the point here is finding savings *outside*
+/// the stores already chosen.
+///
+/// Returns null when there's nothing to recommend: an empty cart, or a
+/// mixed-store total that doesn't actually beat the best single-store total
+/// (per the spec rule, it's only surfaced when it wins).
+final mixedStoreTotalProvider = FutureProvider<MixedStoreTotal?>((ref) async {
+  final entries = await ref.watch(shoppingListEntriesProvider.future);
+  if (entries.isEmpty) return null;
+
+  final priceRepo = ref.watch(priceRepositoryProvider);
+
+  final itemCodes = [for (final e in entries) e.product.itemCode];
+  final cheapestByItem = await priceRepo.getCheapestPrices(itemCodes);
+
+  var mixedTotal = 0.0;
+  var missing = 0;
+  final storesUsed = <String>{};
+  for (final entry in entries) {
+    final price = cheapestByItem[entry.product.itemCode];
+    if (price == null) {
+      missing++;
+      continue;
+    }
+    mixedTotal += price.price * entry.quantity;
+    storesUsed.add(price.premiseCode);
+  }
+
+  // Baseline to beat: the cheapest total of buying everything from any one
+  // store already touched by the cart.
+  final candidatePremiseCodes = {
+    for (final e in entries)
+      if (e.price != null) e.price!.premiseCode,
+  };
+  double? bestSingleStoreTotal;
+  for (final premiseCode in candidatePremiseCodes) {
+    final result = await _storeTotalFor(premiseCode, entries, priceRepo);
+    if (bestSingleStoreTotal == null || result.total < bestSingleStoreTotal) {
+      bestSingleStoreTotal = result.total;
+    }
+  }
+  if (bestSingleStoreTotal == null) return null;
+
+  final savings = bestSingleStoreTotal - mixedTotal;
+  if (savings <= 0) return null;
+
+  return MixedStoreTotal(
+    total: mixedTotal,
+    missingItemCount: missing,
+    storeCount: storesUsed.length,
+    savings: savings,
+  );
 });
 
 class ShoppingListController {
