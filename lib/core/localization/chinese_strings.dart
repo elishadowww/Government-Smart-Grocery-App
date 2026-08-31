@@ -146,6 +146,8 @@ class ChineseStrings {
     'navigate': '导航',
     'view_prices': '查看价格',
     'nearby_stores': '附近的商店',
+    'nearby_cheapest_supermarket': '附近最便宜的超市',
+    'no_nearby_supermarket': '尚未找到附近的超市。',
     'found': '个已找到',
     'no_supermarkets_found': '未找到超市。',
     'address': '地址',

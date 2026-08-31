@@ -146,6 +146,8 @@ class MalayStrings {
     'navigate': 'Navigasi',
     'view_prices': 'Lihat Harga',
     'nearby_stores': 'Kedai Berdekatan',
+    'nearby_cheapest_supermarket': 'Pasar Raya Termurah Berdekatan',
+    'no_nearby_supermarket': 'Tiada pasar raya berdekatan dijumpai lagi.',
     'found': 'dijumpai',
     'no_supermarkets_found': 'Tiada pasar raya dijumpai.',
     'address': 'Alamat',

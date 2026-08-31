@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/app_empty.dart';
 import '../../../core/widgets/app_search_bar.dart';
+import '../../../core/widgets/app_skeleton.dart';
 import '../../../core/widgets/budget_card.dart';
 import '../../../core/widgets/cart_app_bar_action.dart';
+import '../../../providers/nearby_supermarket_provider.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../providers/price_provider.dart';
 import '../../../providers/recent_product_provider.dart';
@@ -16,9 +18,10 @@ import '../../../core/localization/app_strings.dart';
 /// Dashboard (spec Fig 7.1.1): landing screen and navigation hub. Search,
 /// Nearby, Cart, Favourites, Notifications and Budget are wired to real
 /// screens; Price Trends is out of this branch's scope and shows a
-/// placeholder. The "Nearby Cheapest Supermarket" card is omitted since
-/// PriceCatcher stores have no coordinates to rank by proximity without a
-/// live location fix per item.
+/// placeholder. The "Nearby Cheapest Supermarket" card ranks Google
+/// Places results (which carry real coordinates) rather than PriceCatcher
+/// stores directly, matching each to its PriceCatcher premise locally —
+/// see [nearbyCheapestSupermarketProvider].
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -95,6 +98,8 @@ class DashboardScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           const BudgetCard(),
+          const SizedBox(height: 12),
+          const _NearbyCheapestSupermarketCard(),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -140,6 +145,64 @@ class _QuickAction extends StatelessWidget {
               Icon(icon, color: AppColors.primary),
               const SizedBox(height: 6),
               Text(label, style: const TextStyle(fontSize: 12)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NearbyCheapestSupermarketCard extends ConsumerWidget {
+  const _NearbyCheapestSupermarketCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final storeAsync = ref.watch(nearbyCheapestSupermarketProvider);
+    final store = storeAsync.value;
+
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => context.push('/nearby'),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              const Icon(Icons.storefront_outlined, color: AppColors.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ref.tr('nearby_cheapest_supermarket'),
+                      style: const TextStyle(fontSize: 12, color: AppColors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    if (storeAsync.isLoading)
+                      const SkeletonBox(height: 14, width: 140)
+                    else
+                      Text(
+                        store == null ? ref.tr('no_nearby_supermarket') : store.premise.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                      ),
+                  ],
+                ),
+              ),
+              if (store != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  '${store.distanceKm.toStringAsFixed(1)} km',
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                ),
+              ],
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right, color: AppColors.grey),
             ],
           ),
         ),

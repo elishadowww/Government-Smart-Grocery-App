@@ -146,6 +146,8 @@ class EnglishStrings {
     'navigate': 'Navigate',
     'view_prices': 'View Prices',
     'nearby_stores': 'Nearby Stores',
+    'nearby_cheapest_supermarket': 'Nearby Cheapest Supermarket',
+    'no_nearby_supermarket': 'No nearby supermarket found yet.',
     'found': 'found',
     'no_supermarkets_found': 'No supermarkets found.',
     'address': 'Address',
