@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/shopping_provider.dart';
+import '../localization/app_strings.dart';
 
 /// Persistent cart entry point for the app bar — icon plus an item-count
 /// badge — so the cart is reachable from wherever the user is without
@@ -20,7 +21,7 @@ class CartAppBarAction extends ConsumerWidget {
         label: Text('$count'),
         child: const Icon(Icons.shopping_cart_outlined),
       ),
-      tooltip: 'Cart',
+      tooltip: ref.tr('cart'),
       onPressed: () => context.push('/cart'),
     );
   }

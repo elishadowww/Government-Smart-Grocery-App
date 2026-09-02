@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/app_colors.dart';
+import '../localization/app_strings.dart';
 
 /// Shared search entry point (spec §6: SearchBar → product search, saved
 /// products search, dashboard shortcut).
-class AppSearchBar extends StatelessWidget {
+class AppSearchBar extends ConsumerWidget {
   const AppSearchBar({
     super.key,
     required this.controller,
-    this.hintText = 'Search products...',
+    this.hintText,
     this.onChanged,
     this.onSubmitted,
     this.onTap,
@@ -17,7 +19,7 @@ class AppSearchBar extends StatelessWidget {
   });
 
   final TextEditingController controller;
-  final String hintText;
+  final String? hintText;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onTap;
@@ -25,7 +27,7 @@ class AppSearchBar extends StatelessWidget {
   final bool autofocus;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return TextField(
       controller: controller,
       onChanged: onChanged,
@@ -35,7 +37,7 @@ class AppSearchBar extends StatelessWidget {
       autofocus: autofocus,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: hintText ?? ref.tr('search_products'),
         prefixIcon: const Icon(Icons.search, color: AppColors.grey),
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: controller,
@@ -43,7 +45,7 @@ class AppSearchBar extends StatelessWidget {
             if (value.text.isEmpty) return const SizedBox.shrink();
             return IconButton(
               icon: const Icon(Icons.close, size: 20, color: AppColors.grey),
-              tooltip: 'Clear search',
+              tooltip: ref.tr('clear_search'),
               onPressed: () {
                 controller.clear();
                 onChanged?.call('');

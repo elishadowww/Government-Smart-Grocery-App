@@ -1,15 +1,17 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 
-class TrendChart extends StatelessWidget {
+class TrendChart extends ConsumerWidget {
   final List<Map<String, dynamic>> records;
 
   const TrendChart({super.key, required this.records});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     List<double> prices = [];
     List<String> monthLabels = [];
 
@@ -27,13 +29,13 @@ class TrendChart extends StatelessWidget {
     }
 
     if (prices.length < 2) {
-      return const SizedBox(
+      return SizedBox(
         height: 180,
         child: Center(
           child: Text(
-            'Not enough price data to show a trend',
+            ref.tr('not_enough_price_data_for_trend'),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: Color(0xFF888888)),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF888888)),
           ),
         ),
       );

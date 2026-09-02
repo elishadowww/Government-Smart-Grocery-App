@@ -1,13 +1,21 @@
 import 'package:geolocator/geolocator.dart';
 
+enum LocationErrorType { serviceDisabled, permissionDenied, permissionDeniedForever }
+
+/// Thrown by [LocationService.getCurrentLocation]. Carries a [type] rather
+/// than a hardcoded message so callers can present a localized string.
+class LocationServiceException implements Exception {
+  LocationServiceException(this.type);
+
+  final LocationErrorType type;
+}
+
 class LocationService {
   Future<Position> getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
     if (!serviceEnabled) {
-      throw Exception(
-        "Location services are disabled. Please enable GPS.",
-      );
+      throw LocationServiceException(LocationErrorType.serviceDisabled);
     }
 
     LocationPermission permission =
@@ -18,15 +26,11 @@ class LocationService {
     }
 
     if (permission == LocationPermission.denied) {
-      throw Exception(
-        "Location permission denied.",
-      );
+      throw LocationServiceException(LocationErrorType.permissionDenied);
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception(
-        "Location permission permanently denied.\nPlease enable it from Settings.",
-      );
+      throw LocationServiceException(LocationErrorType.permissionDeniedForever);
     }
 
     return await Geolocator.getCurrentPosition(

@@ -1,30 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../providers/locale_provider.dart';
+import '../localization/app_strings.dart';
 import 'app_button.dart';
+
+String _tr(BuildContext context, String key) {
+  final languageCode = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(localeProvider).languageCode;
+  return AppStrings.tr(key, languageCode);
+}
 
 /// Guest-gating dialog (spec Fig 7.2.2), triggered when a Guest attempts a
 /// registered-only action like "Save Product". Returns true if the user
 /// tapped Login (and was navigated there), false/null on Cancel.
 Future<bool?> showLoginRequiredDialog(
   BuildContext context, {
-  String message = 'Please log in to save favourites and receive price alerts.',
+  String? message,
 }) {
   return showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text('Login Required'),
-      content: Text(message),
+      title: Text(_tr(context, 'login_required')),
+      content: Text(message ?? _tr(context, 'login_required_message')),
       actions: [
         AppButton(
-          label: 'Cancel',
+          label: _tr(context, 'cancel'),
           type: AppButtonType.text,
           expand: false,
           onPressed: () => Navigator.of(context).pop(false),
         ),
         AppButton(
-          label: 'Login',
+          label: _tr(context, 'login'),
           type: AppButtonType.filled,
           dense: true,
           expand: false,
@@ -44,8 +55,8 @@ Future<bool?> showConfirmDialog(
   BuildContext context, {
   required String title,
   required String message,
-  String confirmLabel = 'Clear All',
-  String cancelLabel = 'Cancel',
+  String? confirmLabel,
+  String? cancelLabel,
 }) {
   return showDialog<bool>(
     context: context,
@@ -55,13 +66,13 @@ Future<bool?> showConfirmDialog(
       content: Text(message),
       actions: [
         AppButton(
-          label: cancelLabel,
+          label: cancelLabel ?? _tr(context, 'cancel'),
           type: AppButtonType.text,
           expand: false,
           onPressed: () => Navigator.of(context).pop(false),
         ),
         AppButton(
-          label: confirmLabel,
+          label: confirmLabel ?? _tr(context, 'clear_all'),
           type: AppButtonType.filled,
           dense: true,
           expand: false,

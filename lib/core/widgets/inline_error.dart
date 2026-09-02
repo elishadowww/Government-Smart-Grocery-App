@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/app_colors.dart';
+import '../localization/app_strings.dart';
 import 'app_button.dart';
 
 /// Inline error state for list-driven screens (spec §5: "Inline message
 /// with a Retry button"), as opposed to [AppError] which takes over the
 /// whole screen.
-class InlineError extends StatelessWidget {
+class InlineError extends ConsumerWidget {
   const InlineError({super.key, required this.message, this.onRetry});
 
   final String message;
   final VoidCallback? onRetry;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -26,7 +28,7 @@ class InlineError extends StatelessWidget {
             if (onRetry != null) ...[
               const SizedBox(height: 16),
               AppButton(
-                label: 'Retry',
+                label: ref.tr('retry'),
                 type: AppButtonType.outlined,
                 expand: false,
                 onPressed: onRetry,

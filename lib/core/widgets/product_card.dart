@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../models/product.dart';
+import '../localization/app_strings.dart';
 import '../utils/category_icons.dart';
 import 'app_button.dart';
 
 /// Search-result product card (spec §7.3 "Product Card — Component Spec":
 /// name, category, unit, cheapest price + store, Compare Prices / Add).
-class ProductCard extends StatelessWidget {
+class ProductCard extends ConsumerWidget {
   const ProductCard({
     super.key,
     required this.product,
@@ -34,7 +36,7 @@ class ProductCard extends StatelessWidget {
   final VoidCallback? onAdd;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: AppColors.white,
       borderRadius: BorderRadius.circular(12),
@@ -76,7 +78,9 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                         Tooltip(
-                          message: isSaved ? 'Remove from favourites' : 'Add to favourites',
+                          message: isSaved
+                              ? ref.tr('remove_from_favourites')
+                              : ref.tr('add_to_favourites'),
                           child: InkWell(
                             onTap: onToggleSave,
                             borderRadius: BorderRadius.circular(20),
@@ -97,14 +101,14 @@ class ProductCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'Category: ${product.itemCategory}',
+                            '${ref.tr('category')}: ${product.itemCategory}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 12, color: AppColors.grey),
                           ),
                         ),
                         Text(
-                          'Unit: ${product.unit}',
+                          '${ref.tr('unit')}: ${product.unit}',
                           style: const TextStyle(fontSize: 12, color: AppColors.grey),
                         ),
                       ],
@@ -116,7 +120,7 @@ class ProductCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: AppButton(
-                            label: 'Compare',
+                            label: ref.tr('compare'),
                             type: AppButtonType.outlined,
                             dense: true,
                             icon: Icons.compare_arrows,
@@ -126,7 +130,7 @@ class ProductCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: AppButton(
-                            label: 'Add',
+                            label: ref.tr('add'),
                             type: AppButtonType.filled,
                             dense: true,
                             icon: Icons.add_shopping_cart,
@@ -146,18 +150,18 @@ class ProductCard extends StatelessWidget {
   }
 }
 
-class _CheapestPriceLine extends StatelessWidget {
+class _CheapestPriceLine extends ConsumerWidget {
   const _CheapestPriceLine({required this.price, required this.storeName});
 
   final double? price;
   final String? storeName;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (price == null) {
-      return const Text(
-        'Price unavailable',
-        style: TextStyle(fontSize: 13, color: AppColors.grey),
+      return Text(
+        ref.tr('price_unavailable'),
+        style: const TextStyle(fontSize: 13, color: AppColors.grey),
       );
     }
 
@@ -165,7 +169,7 @@ class _CheapestPriceLine extends StatelessWidget {
       text: TextSpan(
         style: const TextStyle(fontSize: 13, color: AppColors.grey),
         children: [
-          const TextSpan(text: 'Cheapest: '),
+          TextSpan(text: '${ref.tr('cheapest')}: '),
           TextSpan(
             text: 'RM${price!.toStringAsFixed(2)}',
             style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),

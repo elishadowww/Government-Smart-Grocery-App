@@ -156,7 +156,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = e.toString();
+          _errorMessage = e is LocationServiceException
+              ? _localizedLocationError(e.type)
+              : e.toString();
         });
       }
 
@@ -167,6 +169,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  String _localizedLocationError(LocationErrorType type) {
+    switch (type) {
+      case LocationErrorType.serviceDisabled:
+        return ref.tr('location_services_disabled');
+      case LocationErrorType.permissionDenied:
+        return ref.tr('location_permission_denied');
+      case LocationErrorType.permissionDeniedForever:
+        return ref.tr('location_permission_denied_forever');
     }
   }
 

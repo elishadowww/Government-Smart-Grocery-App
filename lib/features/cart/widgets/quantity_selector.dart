@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 
 /// Compact +/- quantity stepper (spec §7.5 "Qty [ 2 ] x").
-class QuantitySelector extends StatelessWidget {
+class QuantitySelector extends ConsumerWidget {
   const QuantitySelector({
     super.key,
     required this.quantity,
@@ -14,13 +16,13 @@ class QuantitySelector extends StatelessWidget {
   final ValueChanged<int> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _StepButton(
           icon: Icons.remove,
-          tooltip: 'Decrease quantity',
+          tooltip: ref.tr('decrease_quantity'),
           onTap: () => onChanged(quantity - 1),
         ),
         SizedBox(
@@ -33,7 +35,7 @@ class QuantitySelector extends StatelessWidget {
         ),
         _StepButton(
           icon: Icons.add,
-          tooltip: 'Increase quantity',
+          tooltip: ref.tr('increase_quantity'),
           onTap: () => onChanged(quantity + 1),
         ),
       ],
